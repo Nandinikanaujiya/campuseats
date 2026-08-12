@@ -1,22 +1,10 @@
--- ============================================================================
 -- CS 543 Web Services — Assignment 2
--- CampusEats Relational Schema Definition (PostgreSQL DDL)
+-- CampusEats Relational Schema Definition (PostgreSQL)
 -- 
--- Rules Enforced:
--- 1. Boundary Rule: Each service owns its database tables. No table belongs
---    to more than one service.
--- 2. Decoupled References: Cross-service relations are modeled as logical
---    UUID attributes rather than hard FOREIGN KEY constraints, allowing the 
---    services to run on separate physical databases in production.
--- ============================================================================
+-- Boundary Rule: Each service owns its database tables. No table belongs to more than one service.
+-- Decoupled References: Cross-service relations are modeled as UUID attributes instead of hard Foreign Keys.
 
--- CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-
--- ============================================================================
--- 1. USER SERVICE SCHEMA
--- Represents user identities, credential salts, and role-based metadata.
--- ============================================================================
-
+-- 1. USER SERVICE
 CREATE TABLE users (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name VARCHAR(100) NOT NULL,
@@ -34,11 +22,7 @@ CREATE TABLE user_credentials (
 );
 
 
--- ============================================================================
--- 2. CANTEEN (CATALOGUE) SERVICE SCHEMA
--- Holds information about campus canteens, categorizations, and menu items.
--- ============================================================================
-
+-- 2. CANTEEN (CATALOGUE) SERVICE
 CREATE TABLE canteens (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name VARCHAR(100) NOT NULL,
@@ -67,11 +51,7 @@ CREATE TABLE menu_items (
 );
 
 
--- ============================================================================
--- 3. ORDER SERVICE SCHEMA
--- Manages cart state, order placement, order line items, and lifecycle status.
--- ============================================================================
-
+-- 3. ORDER SERVICE
 CREATE TABLE orders (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     customer_id UUID NOT NULL, -- Logical Reference to User Service
@@ -96,13 +76,9 @@ CREATE TABLE order_items (
 );
 
 
--- ============================================================================
--- 4. DELIVERY SERVICE SCHEMA
--- Coordinates rider dispatch, tracking coordinates, and drop-off geofences.
--- ============================================================================
-
+-- 4. DELIVERY SERVICE
 CREATE TABLE rider_profiles (
-    rider_id UUID PRIMARY KEY, -- Logical Reference to User Service (user_type = rider)
+    rider_id UUID PRIMARY KEY, -- Logical Reference to User Service
     current_lat DOUBLE PRECISION,
     current_lng DOUBLE PRECISION,
     rider_status VARCHAR(20) NOT NULL CHECK (rider_status IN ('offline', 'idle', 'delivering')),
@@ -122,11 +98,7 @@ CREATE TABLE delivery_jobs (
 );
 
 
--- ============================================================================
--- 5. PAYMENT SERVICE SCHEMA
--- Logs transactions, payment gateway sync reference tokens, and refunds.
--- ============================================================================
-
+-- 5. PAYMENT SERVICE
 CREATE TABLE payments (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     order_id UUID UNIQUE NOT NULL, -- Logical Reference to Order Service

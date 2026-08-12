@@ -1,75 +1,49 @@
 # CampusEats System Brief
 
-CampusEats is an on-campus food ordering and delivery web application specifically tailored for university campuses. The platform enables students, faculty, and staff to order meals from campus canteens and cafes, with logistics fulfilled by student riders using eco-friendly transportation (walking, bicycles, or e-scooters) to deliver meals directly to classrooms, dormitories, and library study spaces.
+CampusEats is an on-campus food ordering and delivery system. It allows university students and staff to order food from campus canteens, which is then delivered to classrooms, offices, or dorms by student riders.
 
 ---
 
-## 👥 User Roles & Core Workflows
+## 👥 User Roles
 
-The platform serves four primary user roles, each interacting through custom views:
-
-### 1. 🎓 Student/Staff (Customers)
-* Browse list of participating campus canteens and filter by food type, wait time, or dietary restrictions (e.g., vegetarian, gluten-free).
-* Build cart, customize ingredients (e.g., extra toppings), and checkout securely via campus card integration or digital wallets.
-* Track order status (Placed ➔ Preparing ➔ Out for Delivery ➔ Arrived) in real-time.
-
-### 2. 🍳 Canteen Operators (Merchants)
-* Manage canteen profile, update operating hours, and toggle menu item availability dynamically.
-* View and update incoming orders via a tablet dashboard.
-* Update food preparation status (e.g., marking an order as "Ready for Pickup").
-
-### 3. 🚲 Student Riders (Delivery Partners)
-* View pool of available delivery jobs on campus, listing canteen pickup and classroom/dorm delivery coordinates.
-* Accept jobs, navigate the campus, and update delivery status milestones.
-* Track deliveries made, tips earned, and dynamic delivery fee payouts.
-
-### 4. ⚙️ Platform Administrators
-* Onboard new canteens, audit transactions, and manage user disputes.
-* Monitor live system statistics (active orders, queue bottlenecks, driver density).
+- **Customers (Students/Staff)**: Browse canteens, customize menu items, place orders, make payments, and track delivery status.
+- **Canteen Operators (Merchants)**: Manage menus, accept/decline orders, and update prep status.
+- **Riders (Student Delivery)**: View delivery jobs, accept assignments, view delivery locations, and update drop-off milestones.
+- **Platform Administrators**: Manage user accounts, canteen registrations, and resolve system issues.
 
 ---
 
 ## 🏗️ System Architecture
 
-CampusEats utilizes a modern, event-driven web services architecture designed to minimize latency and handle traffic surges during lunch and dinner hours.
+A standard microservices architecture manages the platform processes:
 
 ```
-       ┌──────────────────┐      ┌──────────────────┐      ┌──────────────────┐
-       │   Customer App   │      │   Merchant App   │      │    Rider App     │
-       └────────┬─────────┘      └────────┬─────────┘      └────────┬─────────┘
-                │                         │                         │
-                ▼                         ▼                         ▼
-   ┌─────────────────────────────────────────────────────────────────────────┐
-   │                       API Gateway (Reverse Proxy)                       │
-   └────────────────────────────────────┬────────────────────────────────────┘
-                                        │
-                      ┌─────────────────┴─────────────────┐
-                      ▼                                   ▼
-          ┌───────────────────────┐           ┌───────────────────────┐
-          │   REST API Services   │           │   Real-Time Server    │
-          │ (Authentication, Menu,│           │  (WebSocket Gateway for│
-          │   Order Mgmt, billing)│           │   location tracking)  │
-          └───────────┬───────────┘           └───────────┬───────────┘
-                      │                                   │
-                      ▼                                   ▼
-          ┌───────────────────────┐           ┌───────────────────────┐
-          │  Relational Database  │           │      Cache Store      │
-          │     (PostgreSQL)      │           │    (Redis Cache /     │
-          │   (Persistent Storage)│           │  Active Rider Location)│
-          └───────────────────────┘           └───────────────────────┘
+    [ Customer App ]      [ Merchant App ]      [ Rider App ]
+           │                     │                     │
+           ▼                     ▼                     ▼
+    ┌────────────────────────────────────────────────────────┐
+    │                      API Gateway                       │
+    └───────────────────────────┬────────────────────────────┘
+                                │
+                 ┌──────────────┴──────────────┐
+                 ▼                             ▼
+       ┌───────────────────┐         ┌───────────────────┐
+       │   REST Services   │         │  Real-Time Server │
+       │ (Auth, Menu, Order)         │ (WebSocket/Redis) │
+       └─────────┬─────────┘         └─────────┬─────────┘
+                 │                             │
+                 ▼                             ▼
+       ┌───────────────────┐         ┌───────────────────┐
+       │    PostgreSQL     │         │    Redis Cache    │
+       │   (Primary DB)    │         │  (Live Tracking)  │
+       └───────────────────┘         └───────────────────┘
 ```
-
-* **Client Layer:** Modular web apps built with HTML5, modern CSS, and React, optimized for mobile responsiveness.
-* **REST API Server:** Built using Spring Boot/Node.js to handle stateless HTTP operations (catalog browsing, user creation, order histories).
-* **Real-time Services:** WebSocket nodes facilitating low-latency communication to push live coordinates of delivery riders to customers.
-* **Cache & Message Broker:** Redis stores active delivery rider coordinates and handles pub/sub events for order state changes.
-* **Primary Database:** PostgreSQL stores transactional, relational tables with PostGIS extensions to perform campus geofencing calculations (determining delivery routes and building boundaries).
 
 ---
 
 ## 📊 Database Schema (Entity Relationship Diagram)
 
-Below is the entity schema for CampusEats. It outlines the normalized database architecture designed to maintain transaction integrity.
+Below is the entity relationship diagram for the CampusEats schema.
 
 ```mermaid
 erDiagram
@@ -134,16 +108,12 @@ erDiagram
 
 ---
 
-## 🔌 Core REST API Specifications
+## 🔌 API Specifications
 
-The system exposes the following RESTful API endpoints for client integrations:
-
-### 🍔 Canteen & Menu Endpoints
-
-#### 1. List Active Canteens
-* **Protocol:** `GET /api/v1/canteens`
-* **Response Status:** `200 OK`
-* **Response Payload:**
+### 1. List Canteens
+- **Protocol**: `GET /api/v1/canteens`
+- **Response**: `200 OK`
+- **Body**:
   ```json
   [
     {
@@ -155,14 +125,13 @@ The system exposes the following RESTful API endpoints for client integrations:
   ]
   ```
 
-#### 2. Get Canteen Menu
-* **Protocol:** `GET /api/v1/canteens/{canteen_id}/menu`
-* **Response Status:** `200 OK` / `404 Not Found`
-* **Response Payload:**
+### 2. Get Menu
+- **Protocol**: `GET /api/v1/canteens/{canteen_id}/menu`
+- **Response**: `200 OK`
+- **Body**:
   ```json
   {
     "canteen_id": "e30b3558-7264-4e2b-987a-624e4d41fa99",
-    "canteen_name": "Central Food Court",
     "menu_items": [
       {
         "id": "18f9d023-fa58-450f-90e9-b5f76ee3b1a8",
@@ -174,11 +143,9 @@ The system exposes the following RESTful API endpoints for client integrations:
   }
   ```
 
-### 🛒 Ordering Endpoints
-
-#### 3. Place Order
-* **Protocol:** `POST /api/v1/orders`
-* **Request Payload:**
+### 3. Place Order
+- **Protocol**: `POST /api/v1/orders`
+- **Request Body**:
   ```json
   {
     "canteen_id": "e30b3558-7264-4e2b-987a-624e4d41fa99",
@@ -191,33 +158,13 @@ The system exposes the following RESTful API endpoints for client integrations:
     "dropoff_location_building": "Science Lab A"
   }
   ```
-* **Response Status:** `201 Created` / `400 Bad Request`
-* **Response Payload:**
+- **Response**: `201 Created`
+- **Body**:
   ```json
   {
     "order_id": "99b0c79f-6821-4fa3-9e4a-43d99dcf5d1e",
     "order_status": "placed",
     "total_price": 11.98,
     "ordered_at": "2026-08-12T15:45:10Z"
-  }
-  ```
-
-#### 4. Update Delivery Job Status
-* **Protocol:** `PATCH /api/v1/delivery-jobs/{job_id}/status`
-* **Request Payload:**
-  ```json
-  {
-    "status": "transit"
-  }
-  ```
-* **Response Status:** `200 OK` / `403 Forbidden` / `404 Not Found`
-* **Response Payload:**
-  ```json
-  {
-    "job_id": "887fa541-11e2-45e3-99ab-6d88f619b0aa",
-    "order_id": "99b0c79f-6821-4fa3-9e4a-43d99dcf5d1e",
-    "rider_id": "43cfb439-d3ee-4db9-8b01-52316e6d1234",
-    "delivery_status": "transit",
-    "updated_at": "2026-08-12T15:52:12Z"
   }
   ```
