@@ -76,9 +76,9 @@ erDiagram
     USERS {
         uuid id PK
         varchar name
-        varchar email UNIQUE
+        varchar email
         varchar phone
-        varchar user_type "customer | merchant | rider | admin"
+        varchar user_type
         timestamp created_at
     }
     CANTEENS {
@@ -101,7 +101,7 @@ erDiagram
         uuid id PK
         uuid customer_id FK
         uuid canteen_id FK
-        varchar order_status "placed | preparing | ready | delivery | completed | cancelled"
+        varchar order_status
         decimal total_price
         timestamp ordered_at
     }
@@ -114,9 +114,9 @@ erDiagram
     }
     DELIVERY_JOBS {
         uuid id PK
-        uuid order_id FK UNIQUE
+        uuid order_id FK
         uuid rider_id FK
-        varchar delivery_status "assigned | pickup | transit | arrived | delivered"
+        varchar delivery_status
         varchar dropoff_location_building
         decimal delivery_fee
         timestamp assigned_at
