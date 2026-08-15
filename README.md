@@ -6,7 +6,6 @@ This repository contains the deliverables and design documentation for CS 543 We
 
 - **[docs/http-log.md](docs/http-log.md)** - Log of HTTP request and response analysis using curl.
 - **[docs/network-analysis.md](docs/network-analysis.md)** - Browser DevTools network analysis report of github.com.
-- **[docs/brief.md](docs/brief.md)** - Overview and system brief of the CampusEats platform.
 
 ## Verification
 - HTTP calls can be reproduced with standard `curl` commands shown in the logs.
