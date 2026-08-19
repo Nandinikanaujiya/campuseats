@@ -78,11 +78,6 @@ This section contains the SOAP Partner Integration design deliverables for Assig
   - [soap-request.xml](file:///C:/AI%20Coding%20Challenge%20Platform/Assignment-3/soap-request.xml) &mdash; Hand-formed SOAP Request with WS-Security header.
   - [soap-response.xml](file:///C:/AI%20Coding%20Challenge%20Platform/Assignment-3/soap-response.xml) &mdash; Hand-formed SOAP success Response envelope.
   - [soap-fault.xml](file:///C:/AI%20Coding%20Challenge%20Platform/Assignment-3/soap-fault.xml) &mdash; SOAP Fault envelope representing card declination/insufficient funds.
-
-#### 4. 🗜️ [All Documents Zip](Assignment-3/assignment3.zip)
-* **File:** [Assignment-3/assignment3.zip](file:///C:/AI%20Coding%20Challenge%20Platform/Assignment-3/assignment3.zip)
-* **Overview:** Unified zip archive of all Assignment 3 documents for final submission.
-
 ---
 
 ## 🛠️ Verification & Tools Used
