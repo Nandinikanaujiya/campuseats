@@ -1,7 +1,7 @@
 # CampusEats Engineering & Analysis Suite
 
 [![Web Services](https://img.shields.io/badge/Course-CS%20543%20Web%20Services-blue.svg)](https://github.com/TargetUltimate-Alka/campuseats)
-[![Author](https://img.shields.io/badge/Author-Radhika%20Verma-orange.svg)](https://github.com/Radhika-Verma08)
+[![Author](https://img.shields.io/badge/Author-Nandini%20Kanaujiya-orange.svg)](https://github.com/Nandinikanaujiya)
 [![Documentation](https://img.shields.io/badge/Documentation-Complete-brightgreen.svg)]()
 
 ### 👥 Team & Members (Team No. 10)
