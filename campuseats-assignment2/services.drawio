@@ -1,0 +1,106 @@
+<mxfile host="Electron" modified="2026-08-12T15:53:00.000Z" agent="Mozilla/5.0" version="21.6.8" type="device">
+  <diagram id="campuseats_services" name="CampusEats Services">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        
+        <!-- ========================================== -->
+        <!-- SERVICES (BOXES)                           -->
+        <!-- ========================================== -->
+        
+        <!-- User Service -->
+        <mxCell id="user_svc" value="&lt;b&gt;User Service&lt;/b&gt;&#xa;&lt;i&gt;Lead: Nandini (Leader)&lt;/i&gt;&#xa;───────&#xa;Owns Data:&#xa;• users&#xa;• user_credentials" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;align=center;" vertex="1" parent="1">
+          <mxGeometry x="80" y="80" width="180" height="100" as="geometry" />
+        </mxCell>
+        
+        <!-- Canteen Service -->
+        <mxCell id="canteen_svc" value="&lt;b&gt;Canteen Service&lt;/b&gt;&#xa;&lt;i&gt;Lead: Alok&lt;/i&gt;&#xa;───────&#xa;Owns Data:&#xa;• canteens&#xa;• menu_categories&#xa;• menu_items" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;align=center;" vertex="1" parent="1">
+          <mxGeometry x="400" y="80" width="180" height="100" as="geometry" />
+        </mxCell>
+        
+        <!-- Order Service -->
+        <mxCell id="order_svc" value="&lt;b&gt;Order Service&lt;/b&gt;&#xa;&lt;i&gt;Lead: Radhika&lt;/i&gt;&#xa;───────&#xa;Owns Data:&#xa;• orders&#xa;• order_items" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=center;" vertex="1" parent="1">
+          <mxGeometry x="240" y="240" width="180" height="100" as="geometry" />
+        </mxCell>
+        
+        <!-- Payment Service -->
+        <mxCell id="payment_svc" value="&lt;b&gt;Payment Service&lt;/b&gt;&#xa;&lt;i&gt;Team: Nandini, Alka, Radhika, Alok&lt;/i&gt;&#xa;───────&#xa;Owns Data:&#xa;• payments&#xa;• payment_refunds" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;align=center;" vertex="1" parent="1">
+          <mxGeometry x="80" y="420" width="180" height="100" as="geometry" />
+        </mxCell>
+        
+        <!-- Delivery Service -->
+        <mxCell id="delivery_svc" value="&lt;b&gt;Delivery Service&lt;/b&gt;&#xa;&lt;i&gt;Lead: Alka&lt;/i&gt;&#xa;───────&#xa;Owns Data:&#xa;• rider_profiles&#xa;• delivery_jobs" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;align=center;" vertex="1" parent="1">
+          <mxGeometry x="400" y="420" width="180" height="100" as="geometry" />
+        </mxCell>
+        
+        <!-- ========================================== -->
+        <!-- CONNECTORS (CROSS-SERVICE ARROWS)          -->
+        <!-- ========================================== -->
+        
+        <!-- Order Svc -> User Svc (checkUser) -->
+        <mxCell id="conn_order_user" value="checkUser" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;exitX=0.25;exitY=0;exitDx=0;exitDy=0;strokeColor=#567c73;strokeWidth=1.5;" edge="1" parent="1" source="order_svc" target="user_svc">
+          <mxGeometry relative="1" as="geometry">
+            <Array points="285, 210", "170, 210" />
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- Order Svc -> Canteen Svc (checkMenu) -->
+        <mxCell id="conn_order_canteen" value="checkMenu" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;exitX=0.75;exitY=0;exitDx=0;exitDy=0;strokeColor=#567c73;strokeWidth=1.5;" edge="1" parent="1" source="order_svc" target="canteen_svc">
+          <mxGeometry relative="1" as="geometry">
+            <Array points="375, 210", "490, 210" />
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- Order Svc -> Payment Svc (processPayment) -->
+        <mxCell id="conn_order_payment" value="processPayment" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;exitX=0.25;exitY=1;exitDx=0;exitDy=0;strokeColor=#567c73;strokeWidth=1.5;" edge="1" parent="1" source="order_svc" target="payment_svc">
+          <mxGeometry relative="1" as="geometry">
+            <Array points="285, 380", "170, 380" />
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- Order Svc -> Delivery Svc (scheduleDelivery) -->
+        <mxCell id="conn_order_delivery" value="scheduleDelivery" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;exitX=0.75;exitY=1;exitDx=0;exitDy=0;strokeColor=#567c73;strokeWidth=1.5;" edge="1" parent="1" source="order_svc" target="delivery_svc">
+          <mxGeometry relative="1" as="geometry">
+            <Array points="375, 380", "490, 380" />
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- Delivery Svc -> User Svc (checkRider) -->
+        <mxCell id="conn_delivery_user" value="checkRider" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;strokeColor=#b07d62;strokeWidth=1.2;dashed=1;" edge="1" parent="1" source="delivery_svc" target="user_svc">
+          <mxGeometry relative="1" as="geometry">
+            <Array points="40, 470", "40, 130" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Notification Service -->
+        <mxCell id="notification_svc" value="&lt;b&gt;Notification Service&lt;/b&gt;&#xa;───────&#xa;Owns Data:&#xa;• message_logs" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#cccccc;align=center;" vertex="1" parent="1">
+          <mxGeometry x="270" y="80" width="120" height="100" as="geometry" />
+        </mxCell>
+        
+        <!-- Payment Gateway -->
+        <mxCell id="payment_gateway" value="&lt;b&gt;Payment Gateway&lt;/b&gt;&#xa;(External System)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#cccccc;align=center;" vertex="1" parent="1">
+          <mxGeometry x="80" y="580" width="180" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- User Svc -> Notification Svc (sendNotification) -->
+        <mxCell id="conn_user_notif" value="sendNotification" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.25;entryDx=0;entryDy=0;exitX=1;exitY=0.25;exitDx=0;exitDy=0;strokeColor=#b07d62;strokeWidth=1.2;dashed=1;" edge="1" parent="1" source="user_svc" target="notification_svc">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- Delivery Svc -> Notification Svc (sendNotification) -->
+        <mxCell id="conn_delivery_notif" value="sendNotification" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.75;entryDx=0;entryDy=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;strokeColor=#b07d62;strokeWidth=1.2;dashed=1;" edge="1" parent="1" source="delivery_svc" target="notification_svc">
+          <mxGeometry relative="1" as="geometry">
+            <Array points="490, 380", "420, 380", "420, 155" />
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- Payment Svc -> Payment Gateway (chargeCard) -->
+        <mxCell id="conn_payment_gateway" value="chargeCard" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;strokeColor=#b07d62;strokeWidth=1.2;dashed=1;" edge="1" parent="1" source="payment_svc" target="payment_gateway">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
