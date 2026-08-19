@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+                  xmlns:tns="http://securepay.com/payment/types/">
+   <soapenv:Header>
+      <wsse:Security xmlns:wsse="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd"
+                     soapenv:mustUnderstand="1">
+         <wsse:UsernameToken>
+            <wsse:Username>campuseats_partner_10</wsse:Username>
+            <wsse:Password Type="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-username-token-profile-1.0#PasswordText">SecureTokenPass2026</wsse:Password>
+         </wsse:UsernameToken>
+      </wsse:Security>
+   </soapenv:Header>
+   <soapenv:Body>
+      <tns:processPaymentRequest>
+         <tns:cardHolderName>Nandini Kanaujiya</tns:cardHolderName>
+         <tns:cardNumber>4111222233334444</tns:cardNumber>
+         <tns:cvv>123</tns:cvv>
+         <tns:expiryDate>12/28</tns:expiryDate>
+         <tns:amount>450.50</tns:amount>
+         <tns:currency>INR</tns:currency>
+      </tns:processPaymentRequest>
+   </soapenv:Body>
+</soapenv:Envelope>

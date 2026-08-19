@@ -12,7 +12,7 @@
 
 ---
 
-Welcome to the **CampusEats Engineering & Analysis Suite**. This repository contains the complete deliverables for **Assignment 1 & Assignment 2 of CS 543 Web Services**. It covers HTTP diagnostics, browser network profiling, and a comprehensive architectural system design brief for a campus food delivery network (Assignment 1), as well as microservice architecture and database schemas (Assignment 2).
+Welcome to the **CampusEats Engineering & Analysis Suite**. This repository contains the complete deliverables for **Assignment 1, Assignment 2 & Assignment 3 of CS 543 Web Services**. It covers HTTP diagnostics, browser network profiling, and a comprehensive architectural system design brief for a campus food delivery network (Assignment 1), microservice architecture and database schemas (Assignment 2), and SOAP partner integration contract-level design (Assignment 3).
 
 ---
 
@@ -58,6 +58,30 @@ This section contains the deliverables and design benchmark for Assignment 2:
 #### 4. 🗃️ [DDL Queries](campuseats-assignment2/schema.sql)
 * **File:** [campuseats-assignment2/schema.sql](file:///C:/AI%20Coding%20Challenge%20Platform/campuseats-assignment2/schema.sql)
 * **Overview:** Database table creation queries (DDL) for PostgreSQL grouped by service schema limits.
+
+---
+
+### 🔌 Assignment 3
+
+This section contains the SOAP Partner Integration design deliverables for Assignment 3:
+
+#### 1. 📄 [Integration Report](Assignment-3/integration.pdf)
+* **File:** [Assignment-3/integration.pdf](file:///C:/AI%20Coding%20Challenge%20Platform/Assignment-3/integration.pdf)
+* **Overview:** Detailed brief covering context/justification for SOAP, HTTP binding details, modern service discovery/registry entry, and SOAP-to-REST fault mapping.
+
+#### 2. 📜 [Partner WSDL Contract](Assignment-3/partner.wsdl)
+* **File:** [Assignment-3/partner.wsdl](file:///C:/AI%20Coding%20Challenge%20Platform/Assignment-3/partner.wsdl)
+* **Overview:** Web Service Description Language (WSDL 1.1) contract for the external `SecurePay` service.
+
+#### 3. ✉️ SOAP Messages
+* **Files:**
+  - [soap-request.xml](file:///C:/AI%20Coding%20Challenge%20Platform/Assignment-3/soap-request.xml) &mdash; Hand-formed SOAP Request with WS-Security header.
+  - [soap-response.xml](file:///C:/AI%20Coding%20Challenge%20Platform/Assignment-3/soap-response.xml) &mdash; Hand-formed SOAP success Response envelope.
+  - [soap-fault.xml](file:///C:/AI%20Coding%20Challenge%20Platform/Assignment-3/soap-fault.xml) &mdash; SOAP Fault envelope representing card declination/insufficient funds.
+
+#### 4. 🗜️ [All Documents Zip](Assignment-3/assignment3.zip)
+* **File:** [Assignment-3/assignment3.zip](file:///C:/AI%20Coding%20Challenge%20Platform/Assignment-3/assignment3.zip)
+* **Overview:** Unified zip archive of all Assignment 3 documents for final submission.
 
 ---
 

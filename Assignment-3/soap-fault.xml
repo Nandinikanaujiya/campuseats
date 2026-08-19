@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+                  xmlns:tns="http://securepay.com/payment/types/">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <soapenv:Fault>
+         <faultcode>soapenv:Client</faultcode>
+         <faultstring>Card Declined: Insufficient Funds</faultstring>
+         <detail>
+            <types:paymentFault xmlns:types="http://securepay.com/payment/types/">
+               <types:errorCode>SP-402</types:errorCode>
+               <types:errorMessage>The transaction was declined by the issuing bank due to insufficient funds in the account.</types:errorMessage>
+            </types:paymentFault>
+         </detail>
+      </soapenv:Fault>
+   </soapenv:Body>
+</soapenv:Envelope>

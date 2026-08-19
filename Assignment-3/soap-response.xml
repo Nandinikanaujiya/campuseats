@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+                  xmlns:tns="http://securepay.com/payment/types/">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <tns:processPaymentResponse>
+         <tns:transactionId>TXN-2026-89472910</tns:transactionId>
+         <tns:status>SUCCESS</tns:status>
+         <tns:authorizationCode>AUTH-773821</tns:authorizationCode>
+         <tns:timestamp>2026-08-19T23:45:00Z</tns:timestamp>
+      </tns:processPaymentResponse>
+   </soapenv:Body>
+</soapenv:Envelope>

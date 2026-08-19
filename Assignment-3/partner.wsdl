@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions name="SecurePayService"
+    targetNamespace="http://securepay.com/payment/"
+    xmlns:tns="http://securepay.com/payment/"
+    xmlns:types="http://securepay.com/payment/types/"
+    xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+    xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+    <!-- WSDL Types: Describes the structure of XML elements passed in messages -->
+    <wsdl:types>
+        <xs:schema targetNamespace="http://securepay.com/payment/types/"
+            xmlns:tns="http://securepay.com/payment/types/"
+            elementFormDefault="qualified">
+
+            <!-- Request Payload -->
+            <xs:element name="processPaymentRequest">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="cardHolderName" type="xs:string"/>
+                        <xs:element name="cardNumber" type="xs:string"/>
+                        <xs:element name="cvv" type="xs:string"/>
+                        <xs:element name="expiryDate" type="xs:string"/>
+                        <xs:element name="amount" type="xs:decimal"/>
+                        <xs:element name="currency" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+
+            <!-- Success Response Payload -->
+            <xs:element name="processPaymentResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="transactionId" type="xs:string"/>
+                        <xs:element name="status" type="xs:string"/>
+                        <xs:element name="authorizationCode" type="xs:string"/>
+                        <xs:element name="timestamp" type="xs:dateTime"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+
+            <!-- Fault Details Payload -->
+            <xs:element name="paymentFault">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="errorCode" type="xs:string"/>
+                        <xs:element name="errorMessage" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+        </xs:schema>
+    </wsdl:types>
+
+    <!-- WSDL Messages: Input, Output, and Fault messages representing parameters -->
+    <wsdl:message name="processPaymentRequestMessage">
+        <wsdl:part name="parameters" element="types:processPaymentRequest"/>
+    </wsdl:message>
+
+    <wsdl:message name="processPaymentResponseMessage">
+        <wsdl:part name="parameters" element="types:processPaymentResponse"/>
+    </wsdl:message>
+
+    <wsdl:message name="paymentFaultMessage">
+        <wsdl:part name="fault" element="types:paymentFault"/>
+    </wsdl:message>
+
+    <!-- WSDL PortType: Defines the abstract operation interface -->
+    <wsdl:portType name="PaymentPortType">
+        <wsdl:operation name="processPayment">
+            <wsdl:input message="tns:processPaymentRequestMessage"/>
+            <wsdl:output message="tns:processPaymentResponseMessage"/>
+            <wsdl:fault name="paymentFault" message="tns:paymentFaultMessage"/>
+        </wsdl:operation>
+    </wsdl:portType>
+
+    <!-- WSDL Binding: Binds the abstract interface to concrete SOAP over HTTP protocol -->
+    <wsdl:binding name="PaymentSoapBinding" type="tns:PaymentPortType">
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <wsdl:operation name="processPayment">
+            <soap:operation soapAction="http://securepay.com/payment/processPayment"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="paymentFault">
+                <soap:fault name="paymentFault" use="literal"/>
+            </wsdl:fault>
+        </wsdl:operation>
+    </wsdl:binding>
+
+    <!-- WSDL Service: Defines the physical access address of the service -->
+    <wsdl:service name="SecurePayService">
+        <wsdl:port name="PaymentPort" binding="tns:PaymentSoapBinding">
+            <soap:address location="https://api.securepay.com/soap/payment"/>
+        </wsdl:port>
+    </wsdl:service>
+
+</wsdl:definitions>
