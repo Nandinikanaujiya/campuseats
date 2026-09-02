@@ -12,7 +12,7 @@
 
 ---
 
-Welcome to the **CampusEats Engineering & Analysis Suite**. This repository contains the complete deliverables for **Assignment 1, Assignment 2 & Assignment 3 of CS 543 Web Services**. It covers HTTP diagnostics, browser network profiling, and a comprehensive architectural system design brief for a campus food delivery network (Assignment 1), microservice architecture and database schemas (Assignment 2), and SOAP partner integration contract-level design (Assignment 3).
+Welcome to the **CampusEats Engineering & Analysis Suite**. This repository contains the complete deliverables for **Assignments 1, 2, 3, and 4 of CS 543 Web Services**. It covers HTTP diagnostics (Assignment 1), microservice architecture and schemas (Assignment 2), SOAP partner integration (Assignment 3), and rebuilding the Orders service in REST with OpenAPI contracts, resilient outbound calls, and safe retries (Assignment 4).
 
 ---
 
@@ -78,6 +78,33 @@ This section contains the SOAP Partner Integration design deliverables for Assig
   - [soap-request.xml](file:///C:/AI%20Coding%20Challenge%20Platform/Assignment-3/soap-request.xml) &mdash; Hand-formed SOAP Request with WS-Security header.
   - [soap-response.xml](file:///C:/AI%20Coding%20Challenge%20Platform/Assignment-3/soap-response.xml) &mdash; Hand-formed SOAP success Response envelope.
   - [soap-fault.xml](file:///C:/AI%20Coding%20Challenge%20Platform/Assignment-3/soap-fault.xml) &mdash; SOAP Fault envelope representing card declination/insufficient funds.
+
+---
+
+### 🌐 Assignment 4
+
+This section contains the RESTful Rebuilding of the CampusEats Orders Service:
+
+#### 1. 📑 [OpenAPI 3.0 Contract](Assignment-4/openapi.yaml)
+* **File:** [Assignment-4/openapi.yaml](file:///C:/AI%20Coding%20Challenge%20Platform/Assignment-4/openapi.yaml)
+* **Overview:** Complete OpenAPI 3.0.3 specification covering all order operations, parameters, reusable schemas, and RFC 7807 error responses.
+
+#### 2. 💻 Microservice Implementation
+* **Files:**
+  - [app.py](file:///C:/AI%20Coding%20Challenge%20Platform/Assignment-4/app.py) &mdash; Flask route handlers (`POST /orders`, `GET /orders/<id>`, `GET /orders`, `POST /orders/<id>/cancellation`).
+  - [models.py](file:///C:/AI%20Coding%20Challenge%20Platform/Assignment-4/models.py) &mdash; Domain model, manual validation, and clean representation separation (`as_json()`).
+  - [store.py](file:///C:/AI%20Coding%20Challenge%20Platform/Assignment-4/store.py) &mdash; In-memory data store and idempotency cache.
+  - [client.py](file:///C:/AI%20Coding%20Challenge%20Platform/Assignment-4/client.py) &mdash; Hardened outbound payment client (timeout, exponential backoff, jitter, safe retries).
+  - [errors.py](file:///C:/AI%20Coding%20Challenge%20Platform/Assignment-4/errors.py) &mdash; Uniform RFC 7807 `problem()` helper.
+
+#### 3. 🧪 [Automated Tests](Assignment-4/tests/test_orders.py)
+* **File:** [Assignment-4/tests/test_orders.py](file:///C:/AI%20Coding%20Challenge%20Platform/Assignment-4/tests/test_orders.py)
+* **Overview:** Pytest test suite covering successful creation with Location header, idempotent repeats, failure 4xx codes, and 404 lookups.
+
+#### 4. 📝 [Assignment Report & Notes](Assignment-4/NOTES.md)
+* **File:** [Assignment-4/NOTES.md](file:///C:/AI%20Coding%20Challenge%20Platform/Assignment-4/NOTES.md)
+* **Overview:** Comprehensive technical report covering Resource Table, A5 justification, D3 fallback reasoning, answers to Questions 1–5, and complete live `curl -i` transcript.
+
 ---
 
 ## 🛠️ Verification & Tools Used

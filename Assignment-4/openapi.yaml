@@ -1,0 +1,377 @@
+openapi: 3.0.3
+info:
+  title: CampusEats Orders Service API
+  description: >-
+    RESTful microservice for CampusEats order lifecycle management, payment
+    integration, and order status transitions. Built for CS 543 Web Services
+    Assignment 4.
+  version: 1.0.0
+  contact:
+    name: CampusEats Engineering Team (Team 10)
+    email: team10@campuseats.internal
+
+servers:
+  - url: http://localhost:5000
+    description: Local Development Server
+
+paths:
+  /orders:
+    post:
+      summary: Create a new order and authorize payment
+      description: >-
+        Places a new food order, validates items and financial calculations,
+        charges payment via outbound payment gateway, and transitions order
+        to placed state.
+      operationId: createOrder
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          schema:
+            type: string
+          required: false
+          description: Unique client key ensuring safe retry without duplicate charges.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderCreateRequest'
+      responses:
+        '201':
+          description: Order successfully created and payment authorized.
+          headers:
+            Location:
+              schema:
+                type: string
+              description: Relative URI of the newly created order resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderResponse'
+        '400':
+          description: Malformed JSON syntax or missing mandatory fields.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '422':
+          description: Semantic domain validation failure (empty items, invalid quantities, price mismatch).
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '502':
+          description: Bad gateway; external payment service failure or connection refusal.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+
+    get:
+      summary: List and filter orders
+      description: Returns a list of orders optionally filtered by customer UUID and/or order status.
+      operationId: listOrders
+      parameters:
+        - in: query
+          name: customer_id
+          schema:
+            type: string
+            format: uuid
+          required: false
+          description: Filter orders belonging to a specific customer UUID.
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum:
+              - placed
+              - preparing
+              - ready_for_pickup
+              - out_for_delivery
+              - delivered
+              - cancelled
+          required: false
+          description: Filter orders by current lifecycle status.
+      responses:
+        '200':
+          description: List of orders matching query filters.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderListResponse'
+        '400':
+          description: Invalid query parameter format.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+
+  /orders/{id}:
+    get:
+      summary: Retrieve a single order by ID
+      description: Returns the published representation of an order. Sensitive internal tokens are withheld.
+      operationId: getOrder
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Unique UUID of the order.
+      responses:
+        '200':
+          description: Order representation retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderResponse'
+        '404':
+          description: Requested order resource was not found.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+
+  /orders/{id}/cancellation:
+    post:
+      summary: Cancel an existing order
+      description: >-
+        State-changing sub-resource that transitions an order from placed/preparing
+        to cancelled. If already delivered or cancelled, a 409 Conflict is returned.
+      operationId: cancelOrder
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Unique UUID of the order to cancel.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CancellationRequest'
+      responses:
+        '200':
+          description: Order successfully cancelled.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderResponse'
+        '400':
+          description: Invalid cancellation request payload.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '404':
+          description: Target order resource does not exist.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '409':
+          description: State conflict; order has already progressed beyond cancellable lifecycle states.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+
+components:
+  schemas:
+    OrderItem:
+      type: object
+      description: Individual line item inside an order.
+      required:
+        - menu_item_id
+        - item_name
+        - quantity
+        - unit_price
+      properties:
+        menu_item_id:
+          type: string
+          format: uuid
+          example: "a81bc81b-dead-4e5d-abff-90865d1e13b1"
+        item_name:
+          type: string
+          example: "Veg Thali Deluxe"
+        quantity:
+          type: integer
+          minimum: 1
+          example: 2
+        unit_price:
+          type: number
+          format: float
+          minimum: 0.00
+          example: 120.00
+        customization_notes:
+          type: string
+          nullable: true
+          example: "Extra spicy, no onions"
+
+    OrderCreateRequest:
+      type: object
+      description: Payload for placing a new order.
+      required:
+        - customer_id
+        - canteen_id
+        - items
+      properties:
+        customer_id:
+          type: string
+          format: uuid
+          example: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+        canteen_id:
+          type: string
+          format: uuid
+          example: "7c9e6679-7425-40de-944b-e07fc1f90ae7"
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderItem'
+          minItems: 1
+        delivery_fee:
+          type: number
+          format: float
+          minimum: 0.00
+          default: 30.00
+          example: 30.00
+        payment_token:
+          type: string
+          description: One-time payment auth token from checkout UI
+          example: "tok_visa_4242"
+        custom_notes:
+          type: string
+          nullable: true
+          example: "Leave at Hostel 4 entrance"
+
+    OrderResponse:
+      type: object
+      description: Public representation of an order resource.
+      required:
+        - id
+        - customer_id
+        - canteen_id
+        - status
+        - items
+        - subtotal
+        - service_fee
+        - delivery_fee
+        - tax
+        - total_price
+        - ordered_at
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d"
+        customer_id:
+          type: string
+          format: uuid
+          example: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+        canteen_id:
+          type: string
+          format: uuid
+          example: "7c9e6679-7425-40de-944b-e07fc1f90ae7"
+        status:
+          type: string
+          enum:
+            - placed
+            - preparing
+            - ready_for_pickup
+            - out_for_delivery
+            - delivered
+            - cancelled
+          example: "placed"
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderItem'
+        subtotal:
+          type: number
+          format: float
+          example: 240.00
+        service_fee:
+          type: number
+          format: float
+          example: 15.00
+        delivery_fee:
+          type: number
+          format: float
+          example: 30.00
+        tax:
+          type: number
+          format: float
+          example: 12.00
+        total_price:
+          type: number
+          format: float
+          example: 297.00
+        ordered_at:
+          type: string
+          format: date-time
+          example: "2026-09-03T01:15:00Z"
+        cancelled_at:
+          type: string
+          format: date-time
+          nullable: true
+          example: null
+        cancellation_reason:
+          type: string
+          nullable: true
+          example: null
+
+    OrderListResponse:
+      type: object
+      required:
+        - orders
+        - count
+      properties:
+        orders:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderResponse'
+        count:
+          type: integer
+          example: 1
+
+    CancellationRequest:
+      type: object
+      required:
+        - reason
+      properties:
+        reason:
+          type: string
+          minLength: 3
+          example: "Customer requested cancellation before food preparation began"
+
+    Problem:
+      type: object
+      description: RFC 7807 Problem Details for HTTP APIs
+      required:
+        - type
+        - title
+        - status
+        - detail
+      properties:
+        type:
+          type: string
+          format: uri
+          example: "https://campuseats.internal/errors/invalid-body"
+        title:
+          type: string
+          example: "Bad Request"
+        status:
+          type: integer
+          example: 400
+        detail:
+          type: string
+          example: "Missing mandatory field 'customer_id' in request body."
+        instance:
+          type: string
+          format: uri
+          nullable: true
+          example: "/orders"

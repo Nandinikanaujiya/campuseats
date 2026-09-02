@@ -1,0 +1,277 @@
+================================================================================
+SCENARIO: 1. Successful Order Creation (201 Created with Location header)
+NOTE:     Demonstrates 201 Created, Location header, and separation of record from representation.
+COMMAND:  curl.exe -i -X POST http://localhost:5000/orders -H "Content-Type: application/json" -H "Idempotency-Key: idemp-student-demo-10" --data-binary "@c:\AI Coding Challenge Platform\Assignment-4\temp_p1.json"
+================================================================================
+HTTP/1.1 201 CREATED
+Server: Werkzeug/3.1.8 Python/3.13.5
+Date: Wed, 02 Sep 2026 19:46:58 GMT
+Content-Type: application/json
+Content-Length: 626
+Location: /orders/d729bf70-2ac6-4cdb-ab17-65691f8604e8
+Connection: close
+
+{
+  "cancellation_reason": null,
+  "cancelled_at": null,
+  "canteen_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+  "custom_notes": "Leave at Hostel 4 entrance",
+  "customer_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "delivery_fee": 30.0,
+  "id": "d729bf70-2ac6-4cdb-ab17-65691f8604e8",
+  "items": [
+    {
+      "item_name": "Veg Thali Deluxe",
+      "menu_item_id": "a81bc81b-dead-4e5d-abff-90865d1e13b1",
+      "quantity": 2,
+      "unit_price": 120.0
+    }
+  ],
+  "ordered_at": "2026-09-02T19:46:58.772473+00:00",
+  "service_fee": 15.0,
+  "status": "placed",
+  "subtotal": 240.0,
+  "tax": 12.0,
+  "total_price": 297.0
+}
+
+
+================================================================================
+SCENARIO: 2. Safe Idempotent Repeat (Same Idempotency-Key returns cached 201)
+NOTE:     Demonstrates safe retry: returns identical 201 response and Location without re-executing payment.
+COMMAND:  curl.exe -i -X POST http://localhost:5000/orders -H "Content-Type: application/json" -H "Idempotency-Key: idemp-student-demo-10" --data-binary "@c:\AI Coding Challenge Platform\Assignment-4\temp_p1.json"
+================================================================================
+HTTP/1.1 201 CREATED
+Server: Werkzeug/3.1.8 Python/3.13.5
+Date: Wed, 02 Sep 2026 19:46:59 GMT
+Content-Type: application/json
+Content-Length: 626
+Location: /orders/d729bf70-2ac6-4cdb-ab17-65691f8604e8
+X-Cache-Lookup: HIT-IDEMPOTENT
+Connection: close
+
+{
+  "cancellation_reason": null,
+  "cancelled_at": null,
+  "canteen_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+  "custom_notes": "Leave at Hostel 4 entrance",
+  "customer_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "delivery_fee": 30.0,
+  "id": "d729bf70-2ac6-4cdb-ab17-65691f8604e8",
+  "items": [
+    {
+      "item_name": "Veg Thali Deluxe",
+      "menu_item_id": "a81bc81b-dead-4e5d-abff-90865d1e13b1",
+      "quantity": 2,
+      "unit_price": 120.0
+    }
+  ],
+  "ordered_at": "2026-09-02T19:46:58.772473+00:00",
+  "service_fee": 15.0,
+  "status": "placed",
+  "subtotal": 240.0,
+  "tax": 12.0,
+  "total_price": 297.0
+}
+
+
+================================================================================
+SCENARIO: 3. Retrieve Single Order Resource (200 OK)
+NOTE:     Returns public representation of order resource with calculated tax and fees.
+COMMAND:  curl.exe -i -X GET http://localhost:5000/orders/d729bf70-2ac6-4cdb-ab17-65691f8604e8
+================================================================================
+HTTP/1.1 200 OK
+Server: Werkzeug/3.1.8 Python/3.13.5
+Date: Wed, 02 Sep 2026 19:47:01 GMT
+Content-Type: application/json
+Content-Length: 626
+Connection: close
+
+{
+  "cancellation_reason": null,
+  "cancelled_at": null,
+  "canteen_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+  "custom_notes": "Leave at Hostel 4 entrance",
+  "customer_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "delivery_fee": 30.0,
+  "id": "d729bf70-2ac6-4cdb-ab17-65691f8604e8",
+  "items": [
+    {
+      "item_name": "Veg Thali Deluxe",
+      "menu_item_id": "a81bc81b-dead-4e5d-abff-90865d1e13b1",
+      "quantity": 2,
+      "unit_price": 120.0
+    }
+  ],
+  "ordered_at": "2026-09-02T19:46:58.772473+00:00",
+  "service_fee": 15.0,
+  "status": "placed",
+  "subtotal": 240.0,
+  "tax": 12.0,
+  "total_price": 297.0
+}
+
+
+================================================================================
+SCENARIO: 4. Filtered Orders Query (200 OK)
+NOTE:     Returns list of active placed orders matching status filter.
+COMMAND:  curl.exe -i -X GET http://localhost:5000/orders?status=placed
+================================================================================
+HTTP/1.1 200 OK
+Server: Werkzeug/3.1.8 Python/3.13.5
+Date: Wed, 02 Sep 2026 19:47:01 GMT
+Content-Type: application/json
+Content-Length: 754
+Connection: close
+
+{
+  "count": 1,
+  "orders": [
+    {
+      "cancellation_reason": null,
+      "cancelled_at": null,
+      "canteen_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+      "custom_notes": "Leave at Hostel 4 entrance",
+      "customer_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "delivery_fee": 30.0,
+      "id": "d729bf70-2ac6-4cdb-ab17-65691f8604e8",
+      "items": [
+        {
+          "item_name": "Veg Thali Deluxe",
+          "menu_item_id": "a81bc81b-dead-4e5d-abff-90865d1e13b1",
+          "quantity": 2,
+          "unit_price": 120.0
+        }
+      ],
+      "ordered_at": "2026-09-02T19:46:58.772473+00:00",
+      "service_fee": 15.0,
+      "status": "placed",
+      "subtotal": 240.0,
+      "tax": 12.0,
+      "total_price": 297.0
+    }
+  ]
+}
+
+
+================================================================================
+SCENARIO: 5. State-Changing Sub-resource: Order Cancellation (200 OK)
+NOTE:     Transitions order status to 'cancelled' and records cancellation audit.
+COMMAND:  curl.exe -i -X POST http://localhost:5000/orders/d729bf70-2ac6-4cdb-ab17-65691f8604e8/cancellation -H "Content-Type: application/json" --data-binary "@c:\AI Coding Challenge Platform\Assignment-4\temp_cancel.json"
+================================================================================
+HTTP/1.1 200 OK
+Server: Werkzeug/3.1.8 Python/3.13.5
+Date: Wed, 02 Sep 2026 19:47:01 GMT
+Content-Type: application/json
+Content-Length: 717
+Connection: close
+
+{
+  "cancellation_reason": "Student requested cancellation before food preparation began",
+  "cancelled_at": "2026-09-02T19:47:01.911959+00:00",
+  "canteen_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+  "custom_notes": "Leave at Hostel 4 entrance",
+  "customer_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "delivery_fee": 30.0,
+  "id": "d729bf70-2ac6-4cdb-ab17-65691f8604e8",
+  "items": [
+    {
+      "item_name": "Veg Thali Deluxe",
+      "menu_item_id": "a81bc81b-dead-4e5d-abff-90865d1e13b1",
+      "quantity": 2,
+      "unit_price": 120.0
+    }
+  ],
+  "ordered_at": "2026-09-02T19:46:58.772473+00:00",
+  "service_fee": 15.0,
+  "status": "cancelled",
+  "subtotal": 240.0,
+  "tax": 12.0,
+  "total_price": 297.0
+}
+
+
+================================================================================
+SCENARIO: 6. State Conflict: Repeat Cancellation on Cancelled Order (409 Conflict)
+NOTE:     Demonstrates RFC 7807 problem details when resource state conflicts with action.
+COMMAND:  curl.exe -i -X POST http://localhost:5000/orders/d729bf70-2ac6-4cdb-ab17-65691f8604e8/cancellation -H "Content-Type: application/json" --data-binary "@c:\AI Coding Challenge Platform\Assignment-4\temp_cancel.json"
+================================================================================
+HTTP/1.1 409 CONFLICT
+Server: Werkzeug/3.1.8 Python/3.13.5
+Date: Wed, 02 Sep 2026 19:47:02 GMT
+Content-Type: application/problem+json
+Content-Length: 286
+Connection: close
+
+{
+  "detail": "Order 'd729bf70-2ac6-4cdb-ab17-65691f8604e8' has already been cancelled previously.",
+  "instance": "/orders/d729bf70-2ac6-4cdb-ab17-65691f8604e8/cancellation",
+  "status": 409,
+  "title": "State Conflict",
+  "type": "https://campuseats.internal/errors/state-conflict"
+}
+
+
+================================================================================
+SCENARIO: 7. Malformed Request Body: Missing Mandatory Fields (400 Bad Request)
+NOTE:     Demonstrates explicit manual body validation before touching fields.
+COMMAND:  curl.exe -i -X POST http://localhost:5000/orders -H "Content-Type: application/json" --data-binary "@c:\AI Coding Challenge Platform\Assignment-4\temp_bad.json"
+================================================================================
+HTTP/1.1 400 BAD REQUEST
+Server: Werkzeug/3.1.8 Python/3.13.5
+Date: Wed, 02 Sep 2026 19:47:02 GMT
+Content-Type: application/problem+json
+Content-Length: 185
+Connection: close
+
+{
+  "detail": "Missing mandatory field 'customer_id'.",
+  "instance": "/orders",
+  "status": 400,
+  "title": "Bad Request",
+  "type": "https://campuseats.internal/errors/bad-request"
+}
+
+
+================================================================================
+SCENARIO: 8. Domain Validation Refusal: Empty Line Items (422 Unprocessable Entity)
+NOTE:     Demonstrates domain refusal of semantically invalid but well-formed JSON.
+COMMAND:  curl.exe -i -X POST http://localhost:5000/orders -H "Content-Type: application/json" --data-binary "@c:\AI Coding Challenge Platform\Assignment-4\temp_422.json"
+================================================================================
+HTTP/1.1 422 UNPROCESSABLE ENTITY
+Server: Werkzeug/3.1.8 Python/3.13.5
+Date: Wed, 02 Sep 2026 19:47:02 GMT
+Content-Type: application/problem+json
+Content-Length: 210
+Connection: close
+
+{
+  "detail": "An order must contain at least one line item.",
+  "instance": "/orders",
+  "status": 422,
+  "title": "Unprocessable Entity",
+  "type": "https://campuseats.internal/errors/unprocessable-entity"
+}
+
+
+================================================================================
+SCENARIO: 9. Missing Resource Lookup (404 Not Found)
+NOTE:     Demonstrates RFC 7807 404 response for non-existent order identifier.
+COMMAND:  curl.exe -i -X GET http://localhost:5000/orders/00000000-0000-0000-0000-000000000000
+================================================================================
+HTTP/1.1 404 NOT FOUND
+Server: Werkzeug/3.1.8 Python/3.13.5
+Date: Wed, 02 Sep 2026 19:47:02 GMT
+Content-Type: application/problem+json
+Content-Length: 264
+Connection: close
+
+{
+  "detail": "Order with ID '00000000-0000-0000-0000-000000000000' was not found in the catalogue.",
+  "instance": "/orders/00000000-0000-0000-0000-000000000000",
+  "status": 404,
+  "title": "Not Found",
+  "type": "https://campuseats.internal/errors/not-found"
+}
+
+
