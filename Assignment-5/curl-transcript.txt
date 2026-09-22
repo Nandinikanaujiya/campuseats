@@ -1,0 +1,1223 @@
+# ==============================================================================
+# CS 543 Web Services · Assignment 5 — HTTP Methods & Headers
+# Verified curl -v Execution Transcript
+# Team 11: Nandini Kanaujiya, Radhika Verma, Alka Jha, Alok Mishra
+# Service: CampusEats Orders Microservice
+# Date: 2026-09-20
+# ==============================================================================
+
+
+================================================================================
+# SCENARIO 1: Protected endpoint without token -> 401 Unauthorized + WWW-Authenticate header (Requirement B3)
+# Command: curl.exe -v -X POST http://127.0.0.1:5055/orders -H Content-Type: application/json -d {"customer_id": "c0d3c259-0aac-4c19-acef-bbb7cbd9d9d3", "canteen_id": "b38ad05b-816e-4e22-b7c9-2b83c64fb9cb", "items": [{"menu_item_id": "1e84ceb4-e952-47f6-b0f1-136805a9f5a6", "item_name": "Chole Bhature Special", "quantity": 2, "unit_price": 120.0}], "delivery_fee": 30.0, "custom_notes": "Deliver to Canteen Benches"}
+================================================================================
+Note: Unnecessary use of -X or --request, POST is already inferred.
+*   Trying 127.0.0.1:5055...
+* Established connection to 127.0.0.1 (127.0.0.1 port 5055) from 127.0.0.1 port 63078 
+  % Total    % Received % Xferd  Average Speed  Time    Time    Time   Current
+                                 Dload  Upload  Total   Spent   Left   Speed
+
+  0      0   0      0   0      0      0      0                              0* using HTTP/1.x
+> POST /orders HTTP/1.1
+
+> Host: 127.0.0.1:5055
+
+> User-Agent: curl/8.21.0
+
+> Accept: */*
+
+> Content-Type: application/json
+
+> Content-Length: 320
+
+> 
+
+} [320 bytes data]
+* upload completely sent off: 320 bytes
+* HTTP 1.0, assume close after body
+< HTTP/1.0 401 UNAUTHORIZED
+
+< Server: Werkzeug/3.1.8 Python/3.13.5
+
+< Date: Sun, 20 Sep 2026 14:41:34 GMT
+
+< Content-Type: application/problem+json
+
+< Content-Length: 218
+
+< WWW-Authenticate: Bearer realm="CampusEats Orders API"
+
+< X-Content-Type-Options: nosniff
+
+< Strict-Transport-Security: max-age=31536000; includeSubDomains
+
+< Server: CampusEats-OrdersService/2.0
+
+< Access-Control-Allow-Origin: *
+
+< Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS, HEAD
+
+< Access-Control-Allow-Headers: Authorization, Content-Type, Accept, If-None-Match, If-Match, Idempotency-Key, X-HTTP-Method-Override, Accept-Encoding
+
+< Access-Control-Expose-Headers: Location, ETag, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset, Retry-After, Content-Encoding
+
+< X-RateLimit-Limit: 60
+
+< X-RateLimit-Remaining: 59
+
+< X-RateLimit-Reset: 1789915354
+
+< Connection: close
+
+< 
+
+{ [218 bytes data]
+
+100    538 100    218 100    320  55287  81156                              0
+100    538 100    218 100    320  53907  79129                              0
+100    538 100    218 100    320  52403  76923                              0
+* shutting down connection #0
+
+{"detail":"Access denied. Protected endpoint requires a valid 'Authorization: Bearer <token>' header.","instance":"/orders","status":401,"title":"Unauthorized","type":"https://campuseats.internal/errors/unauthorized"}
+
+
+================================================================================
+# SCENARIO 2: Malformed JSON syntax -> 400 Bad Request (Requirement B2)
+# Command: curl.exe -v -X POST http://127.0.0.1:5055/orders -H Authorization: Bearer test-jwt-token-campus-user-2025 -H Content-Type: application/json -d {customer_id: invalid-json-not-quoted}
+================================================================================
+Note: Unnecessary use of -X or --request, POST is already inferred.
+*   Trying 127.0.0.1:5055...
+* Established connection to 127.0.0.1 (127.0.0.1 port 5055) from 127.0.0.1 port 63079 
+  % Total    % Received % Xferd  Average Speed  Time    Time    Time   Current
+                                 Dload  Upload  Total   Spent   Left   Speed
+
+  0      0   0      0   0      0      0      0                              0* using HTTP/1.x
+> POST /orders HTTP/1.1
+
+> Host: 127.0.0.1:5055
+
+> User-Agent: curl/8.21.0
+
+> Accept: */*
+
+> Authorization: Bearer test-jwt-token-campus-user-2025
+
+> Content-Type: application/json
+
+> Content-Length: 38
+
+> 
+
+} [38 bytes data]
+* upload completely sent off: 38 bytes
+* HTTP 1.0, assume close after body
+< HTTP/1.0 400 BAD REQUEST
+
+< Server: Werkzeug/3.1.8 Python/3.13.5
+
+< Date: Sun, 20 Sep 2026 14:41:34 GMT
+
+< Content-Type: application/problem+json
+
+< Content-Length: 243
+
+< X-Content-Type-Options: nosniff
+
+< Strict-Transport-Security: max-age=31536000; includeSubDomains
+
+< Server: CampusEats-OrdersService/2.0
+
+< Access-Control-Allow-Origin: *
+
+< Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS, HEAD
+
+< Access-Control-Allow-Headers: Authorization, Content-Type, Accept, If-None-Match, If-Match, Idempotency-Key, X-HTTP-Method-Override, Accept-Encoding
+
+< Access-Control-Expose-Headers: Location, ETag, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset, Retry-After, Content-Encoding
+
+< X-RateLimit-Limit: 60
+
+< X-RateLimit-Remaining: 59
+
+< X-RateLimit-Reset: 1789915354
+
+< Connection: close
+
+< 
+
+{ [243 bytes data]
+
+100    281 100    243 100     38   9040   1413                              0
+100    281 100    243 100     38   8981   1404                              0
+100    281 100    243 100     38   8919   1394                              0
+* shutting down connection #0
+
+{"detail":"Malformed JSON payload: 400 Bad Request: The browser (or proxy) sent a request that this server could not understand.","instance":"/orders","status":400,"title":"Bad Request","type":"https://campuseats.internal/errors/bad-request"}
+
+
+================================================================================
+# SCENARIO 3: Domain refusal (empty line items) -> 422 Unprocessable Entity (Requirement B2)
+# Command: curl.exe -v -X POST http://127.0.0.1:5055/orders -H Authorization: Bearer test-jwt-token-campus-user-2025 -H Content-Type: application/json -d {"customer_id": "c0d3c259-0aac-4c19-acef-bbb7cbd9d9d3", "canteen_id": "b38ad05b-816e-4e22-b7c9-2b83c64fb9cb", "items": []}
+================================================================================
+Note: Unnecessary use of -X or --request, POST is already inferred.
+*   Trying 127.0.0.1:5055...
+* Established connection to 127.0.0.1 (127.0.0.1 port 5055) from 127.0.0.1 port 63080 
+  % Total    % Received % Xferd  Average Speed  Time    Time    Time   Current
+                                 Dload  Upload  Total   Spent   Left   Speed
+
+  0      0   0      0   0      0      0      0                              0* using HTTP/1.x
+> POST /orders HTTP/1.1
+
+> Host: 127.0.0.1:5055
+
+> User-Agent: curl/8.21.0
+
+> Accept: */*
+
+> Authorization: Bearer test-jwt-token-campus-user-2025
+
+> Content-Type: application/json
+
+> Content-Length: 122
+
+> 
+
+} [122 bytes data]
+* upload completely sent off: 122 bytes
+* HTTP 1.0, assume close after body
+< HTTP/1.0 422 UNPROCESSABLE ENTITY
+
+< Server: Werkzeug/3.1.8 Python/3.13.5
+
+< Date: Sun, 20 Sep 2026 14:41:34 GMT
+
+< Content-Type: application/problem+json
+
+< Content-Length: 189
+
+< X-Content-Type-Options: nosniff
+
+< Strict-Transport-Security: max-age=31536000; includeSubDomains
+
+< Server: CampusEats-OrdersService/2.0
+
+< Access-Control-Allow-Origin: *
+
+< Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS, HEAD
+
+< Access-Control-Allow-Headers: Authorization, Content-Type, Accept, If-None-Match, If-Match, Idempotency-Key, X-HTTP-Method-Override, Accept-Encoding
+
+< Access-Control-Expose-Headers: Location, ETag, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset, Retry-After, Content-Encoding
+
+< X-RateLimit-Limit: 60
+
+< X-RateLimit-Remaining: 58
+
+< X-RateLimit-Reset: 1789915354
+
+< Connection: close
+
+< 
+
+{ [189 bytes data]
+
+100    311 100    189 100    122   8793   5676                              0
+100    311 100    189 100    122   8709   5622                              0
+100    311 100    189 100    122   8611   5558                              0
+* shutting down connection #0
+
+{"detail":"An order must contain at least one line item.","instance":"/orders","status":422,"title":"Unprocessable Entity","type":"https://campuseats.internal/errors/unprocessable-entity"}
+
+
+================================================================================
+# SCENARIO 4: Content negotiation failure (Accept: application/xml) -> 406 Not Acceptable (Requirement B1)
+# Command: curl.exe -v -X GET http://127.0.0.1:5055/orders -H Accept: application/xml
+================================================================================
+Note: Unnecessary use of -X or --request, GET is already inferred.
+*   Trying 127.0.0.1:5055...
+* Established connection to 127.0.0.1 (127.0.0.1 port 5055) from 127.0.0.1 port 63081 
+  % Total    % Received % Xferd  Average Speed  Time    Time    Time   Current
+                                 Dload  Upload  Total   Spent   Left   Speed
+
+  0      0   0      0   0      0      0      0                              0* using HTTP/1.x
+> GET /orders HTTP/1.1
+
+> Host: 127.0.0.1:5055
+
+> User-Agent: curl/8.21.0
+
+> Accept: application/xml
+
+> 
+
+* Request completely sent off
+* HTTP 1.0, assume close after body
+< HTTP/1.0 406 NOT ACCEPTABLE
+
+< Server: Werkzeug/3.1.8 Python/3.13.5
+
+< Date: Sun, 20 Sep 2026 14:41:34 GMT
+
+< Content-Type: application/problem+json
+
+< Content-Length: 220
+
+< X-Content-Type-Options: nosniff
+
+< Strict-Transport-Security: max-age=31536000; includeSubDomains
+
+< Server: CampusEats-OrdersService/2.0
+
+< Access-Control-Allow-Origin: *
+
+< Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS, HEAD
+
+< Access-Control-Allow-Headers: Authorization, Content-Type, Accept, If-None-Match, If-Match, Idempotency-Key, X-HTTP-Method-Override, Accept-Encoding
+
+< Access-Control-Expose-Headers: Location, ETag, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset, Retry-After, Content-Encoding
+
+< X-RateLimit-Limit: 60
+
+< X-RateLimit-Remaining: 58
+
+< X-RateLimit-Reset: 1789915354
+
+< Connection: close
+
+< 
+
+{ [220 bytes data]
+
+100    220 100    220   0      0 100.6k      0                              0
+100    220 100    220   0      0  96745      0                              0
+100    220 100    220   0      0  91590      0                              0
+* shutting down connection #0
+
+{"detail":"Requested media type 'application/xml' cannot be satisfied. Supported: application/json.","instance":"/orders","status":406,"title":"Not Acceptable","type":"https://campuseats.internal/errors/not-acceptable"}
+
+
+================================================================================
+# SCENARIO 5: Successful creation -> 201 Created with Location and ETag headers (Requirement B2, B4)
+# Command: curl.exe -v -X POST http://127.0.0.1:5055/orders -H Authorization: Bearer test-jwt-token-campus-user-2025 -H Content-Type: application/json -H Idempotency-Key: idem-1ae53c450550 -d {"customer_id": "c0d3c259-0aac-4c19-acef-bbb7cbd9d9d3", "canteen_id": "b38ad05b-816e-4e22-b7c9-2b83c64fb9cb", "items": [{"menu_item_id": "1e84ceb4-e952-47f6-b0f1-136805a9f5a6", "item_name": "Chole Bhature Special", "quantity": 2, "unit_price": 120.0}], "delivery_fee": 30.0, "custom_notes": "Deliver to Canteen Benches"}
+================================================================================
+Note: Unnecessary use of -X or --request, POST is already inferred.
+*   Trying 127.0.0.1:5055...
+* Established connection to 127.0.0.1 (127.0.0.1 port 5055) from 127.0.0.1 port 63083 
+  % Total    % Received % Xferd  Average Speed  Time    Time    Time   Current
+                                 Dload  Upload  Total   Spent   Left   Speed
+
+  0      0   0      0   0      0      0      0                              0* using HTTP/1.x
+> POST /orders HTTP/1.1
+
+> Host: 127.0.0.1:5055
+
+> User-Agent: curl/8.21.0
+
+> Accept: */*
+
+> Authorization: Bearer test-jwt-token-campus-user-2025
+
+> Content-Type: application/json
+
+> Idempotency-Key: idem-1ae53c450550
+
+> Content-Length: 320
+
+> 
+
+} [320 bytes data]
+* upload completely sent off: 320 bytes
+* HTTP 1.0, assume close after body
+< HTTP/1.0 201 CREATED
+
+< Server: Werkzeug/3.1.8 Python/3.13.5
+
+< Date: Sun, 20 Sep 2026 14:41:34 GMT
+
+< Content-Type: application/json
+
+< Content-Length: 589
+
+< Location: /orders/a989fd1a-dce6-4dcc-9dbd-6f3abd5e8a71
+
+< ETag: "d3abd421144e8dca9e33b0101d43d634"
+
+< X-Cache-Lookup: HIT-IDEMPOTENT
+
+< X-Content-Type-Options: nosniff
+
+< Strict-Transport-Security: max-age=31536000; includeSubDomains
+
+< Server: CampusEats-OrdersService/2.0
+
+< Access-Control-Allow-Origin: *
+
+< Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS, HEAD
+
+< Access-Control-Allow-Headers: Authorization, Content-Type, Accept, If-None-Match, If-Match, Idempotency-Key, X-HTTP-Method-Override, Accept-Encoding
+
+< Access-Control-Expose-Headers: Location, ETag, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset, Retry-After, Content-Encoding
+
+< X-RateLimit-Limit: 60
+
+< X-RateLimit-Remaining: 56
+
+< X-RateLimit-Reset: 1789915354
+
+< Connection: close
+
+< 
+
+{ [589 bytes data]
+
+100    909 100    589 100    320 227.7k 123.7k                              0
+100    909 100    589 100    320 212.6k 115.5k                              0
+100    909 100    589 100    320 203.8k 110.7k                              0
+* shutting down connection #0
+
+{"cancellation_reason":null,"cancelled_at":null,"canteen_id":"b38ad05b-816e-4e22-b7c9-2b83c64fb9cb","custom_notes":"Deliver to Canteen Benches","customer_id":"c0d3c259-0aac-4c19-acef-bbb7cbd9d9d3","delivery_fee":30.0,"id":"a989fd1a-dce6-4dcc-9dbd-6f3abd5e8a71","items":[{"item_name":"Chole Bhature Special","menu_item_id":"1e84ceb4-e952-47f6-b0f1-136805a9f5a6","quantity":2,"unit_price":120.0}],"ordered_at":"2026-09-20T14:41:34.553551+00:00","service_fee":15.0,"status":"placed","subtotal":240.0,"tax":12.0,"total_price":297.0,"updated_at":"2026-09-20T14:41:34.553551+00:00","version":1}
+
+
+================================================================================
+# SCENARIO 6: Idempotent repeat with same Idempotency-Key -> cached 201 with identical Location (Requirement C3)
+# Command: curl.exe -v -X POST http://127.0.0.1:5055/orders -H Authorization: Bearer test-jwt-token-campus-user-2025 -H Content-Type: application/json -H Idempotency-Key: idem-1ae53c450550 -d {"customer_id": "c0d3c259-0aac-4c19-acef-bbb7cbd9d9d3", "canteen_id": "b38ad05b-816e-4e22-b7c9-2b83c64fb9cb", "items": [{"menu_item_id": "1e84ceb4-e952-47f6-b0f1-136805a9f5a6", "item_name": "Chole Bhature Special", "quantity": 2, "unit_price": 120.0}], "delivery_fee": 30.0, "custom_notes": "Deliver to Canteen Benches"}
+================================================================================
+Note: Unnecessary use of -X or --request, POST is already inferred.
+*   Trying 127.0.0.1:5055...
+* Established connection to 127.0.0.1 (127.0.0.1 port 5055) from 127.0.0.1 port 63084 
+  % Total    % Received % Xferd  Average Speed  Time    Time    Time   Current
+                                 Dload  Upload  Total   Spent   Left   Speed
+
+  0      0   0      0   0      0      0      0                              0* using HTTP/1.x
+> POST /orders HTTP/1.1
+
+> Host: 127.0.0.1:5055
+
+> User-Agent: curl/8.21.0
+
+> Accept: */*
+
+> Authorization: Bearer test-jwt-token-campus-user-2025
+
+> Content-Type: application/json
+
+> Idempotency-Key: idem-1ae53c450550
+
+> Content-Length: 320
+
+> 
+
+} [320 bytes data]
+* upload completely sent off: 320 bytes
+* HTTP 1.0, assume close after body
+< HTTP/1.0 201 CREATED
+
+< Server: Werkzeug/3.1.8 Python/3.13.5
+
+< Date: Sun, 20 Sep 2026 14:41:34 GMT
+
+< Content-Type: application/json
+
+< Content-Length: 589
+
+< Location: /orders/a989fd1a-dce6-4dcc-9dbd-6f3abd5e8a71
+
+< ETag: "d3abd421144e8dca9e33b0101d43d634"
+
+< X-Cache-Lookup: HIT-IDEMPOTENT
+
+< X-Content-Type-Options: nosniff
+
+< Strict-Transport-Security: max-age=31536000; includeSubDomains
+
+< Server: CampusEats-OrdersService/2.0
+
+< Access-Control-Allow-Origin: *
+
+< Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS, HEAD
+
+< Access-Control-Allow-Headers: Authorization, Content-Type, Accept, If-None-Match, If-Match, Idempotency-Key, X-HTTP-Method-Override, Accept-Encoding
+
+< Access-Control-Expose-Headers: Location, ETag, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset, Retry-After, Content-Encoding
+
+< X-RateLimit-Limit: 60
+
+< X-RateLimit-Remaining: 55
+
+< X-RateLimit-Reset: 1789915354
+
+< Connection: close
+
+< 
+
+{ [589 bytes data]
+
+100    909 100    589 100    320 261.0k 141.8k                              0
+100    909 100    589 100    320 240.7k 130.8k                              0
+100    909 100    589 100    320 226.1k 122.8k                              0
+* shutting down connection #0
+
+{"cancellation_reason":null,"cancelled_at":null,"canteen_id":"b38ad05b-816e-4e22-b7c9-2b83c64fb9cb","custom_notes":"Deliver to Canteen Benches","customer_id":"c0d3c259-0aac-4c19-acef-bbb7cbd9d9d3","delivery_fee":30.0,"id":"a989fd1a-dce6-4dcc-9dbd-6f3abd5e8a71","items":[{"item_name":"Chole Bhature Special","menu_item_id":"1e84ceb4-e952-47f6-b0f1-136805a9f5a6","quantity":2,"unit_price":120.0}],"ordered_at":"2026-09-20T14:41:34.553551+00:00","service_fee":15.0,"status":"placed","subtotal":240.0,"tax":12.0,"total_price":297.0,"updated_at":"2026-09-20T14:41:34.553551+00:00","version":1}
+
+
+================================================================================
+# SCENARIO 7: Read single order -> 200 OK with Cache-Control and ETag (Requirement B4)
+# Command: curl.exe -v -X GET http://127.0.0.1:5055/orders/a989fd1a-dce6-4dcc-9dbd-6f3abd5e8a71
+================================================================================
+Note: Unnecessary use of -X or --request, GET is already inferred.
+*   Trying 127.0.0.1:5055...
+* Established connection to 127.0.0.1 (127.0.0.1 port 5055) from 127.0.0.1 port 63085 
+  % Total    % Received % Xferd  Average Speed  Time    Time    Time   Current
+                                 Dload  Upload  Total   Spent   Left   Speed
+
+  0      0   0      0   0      0      0      0                              0* using HTTP/1.x
+> GET /orders/a989fd1a-dce6-4dcc-9dbd-6f3abd5e8a71 HTTP/1.1
+
+> Host: 127.0.0.1:5055
+
+> User-Agent: curl/8.21.0
+
+> Accept: */*
+
+> 
+
+* Request completely sent off
+* HTTP 1.0, assume close after body
+< HTTP/1.0 200 OK
+
+< Server: Werkzeug/3.1.8 Python/3.13.5
+
+< Date: Sun, 20 Sep 2026 14:41:34 GMT
+
+< Content-Type: application/json
+
+< Content-Length: 589
+
+< ETag: "d3abd421144e8dca9e33b0101d43d634"
+
+< Cache-Control: private, max-age=60, must-revalidate
+
+< X-Content-Type-Options: nosniff
+
+< Strict-Transport-Security: max-age=31536000; includeSubDomains
+
+< Server: CampusEats-OrdersService/2.0
+
+< Access-Control-Allow-Origin: *
+
+< Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS, HEAD
+
+< Access-Control-Allow-Headers: Authorization, Content-Type, Accept, If-None-Match, If-Match, Idempotency-Key, X-HTTP-Method-Override, Accept-Encoding
+
+< Access-Control-Expose-Headers: Location, ETag, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset, Retry-After, Content-Encoding
+
+< X-RateLimit-Limit: 60
+
+< X-RateLimit-Remaining: 57
+
+< X-RateLimit-Reset: 1789915354
+
+< Connection: close
+
+< 
+
+{ [589 bytes data]
+
+100    589 100    589   0      0 264.0k      0                              0
+100    589 100    589   0      0 252.1k      0                              0
+100    589 100    589   0      0 244.7k      0                              0
+* shutting down connection #0
+
+{"cancellation_reason":null,"cancelled_at":null,"canteen_id":"b38ad05b-816e-4e22-b7c9-2b83c64fb9cb","custom_notes":"Deliver to Canteen Benches","customer_id":"c0d3c259-0aac-4c19-acef-bbb7cbd9d9d3","delivery_fee":30.0,"id":"a989fd1a-dce6-4dcc-9dbd-6f3abd5e8a71","items":[{"item_name":"Chole Bhature Special","menu_item_id":"1e84ceb4-e952-47f6-b0f1-136805a9f5a6","quantity":2,"unit_price":120.0}],"ordered_at":"2026-09-20T14:41:34.553551+00:00","service_fee":15.0,"status":"placed","subtotal":240.0,"tax":12.0,"total_price":297.0,"updated_at":"2026-09-20T14:41:34.553551+00:00","version":1}
+
+
+================================================================================
+# SCENARIO 8: Conditional GET with matching If-None-Match -> 304 Not Modified (Requirement C1)
+# Command: curl.exe -v -X GET http://127.0.0.1:5055/orders/a989fd1a-dce6-4dcc-9dbd-6f3abd5e8a71 -H If-None-Match: "d3abd421144e8dca9e33b0101d43d634"
+================================================================================
+Note: Unnecessary use of -X or --request, GET is already inferred.
+*   Trying 127.0.0.1:5055...
+* Established connection to 127.0.0.1 (127.0.0.1 port 5055) from 127.0.0.1 port 63086 
+  % Total    % Received % Xferd  Average Speed  Time    Time    Time   Current
+                                 Dload  Upload  Total   Spent   Left   Speed
+
+  0      0   0      0   0      0      0      0                              0* using HTTP/1.x
+> GET /orders/a989fd1a-dce6-4dcc-9dbd-6f3abd5e8a71 HTTP/1.1
+
+> Host: 127.0.0.1:5055
+
+> User-Agent: curl/8.21.0
+
+> Accept: */*
+
+> If-None-Match: "d3abd421144e8dca9e33b0101d43d634"
+
+> 
+
+* Request completely sent off
+* HTTP 1.0, assume close after body
+< HTTP/1.0 304 NOT MODIFIED
+
+< Server: Werkzeug/3.1.8 Python/3.13.5
+
+< Date: Sun, 20 Sep 2026 14:41:34 GMT
+
+< ETag: "d3abd421144e8dca9e33b0101d43d634"
+
+< Cache-Control: private, max-age=60, must-revalidate
+
+< X-Content-Type-Options: nosniff
+
+< Strict-Transport-Security: max-age=31536000; includeSubDomains
+
+< Server: CampusEats-OrdersService/2.0
+
+< Access-Control-Allow-Origin: *
+
+< Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS, HEAD
+
+< Access-Control-Allow-Headers: Authorization, Content-Type, Accept, If-None-Match, If-Match, Idempotency-Key, X-HTTP-Method-Override, Accept-Encoding
+
+< Access-Control-Expose-Headers: Location, ETag, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset, Retry-After, Content-Encoding
+
+< X-RateLimit-Limit: 60
+
+< X-RateLimit-Remaining: 56
+
+< X-RateLimit-Reset: 1789915354
+
+< Connection: close
+
+< 
+
+
+  0      0   0      0   0      0      0      0                              0
+  0      0   0      0   0      0      0      0                              0
+  0      0   0      0   0      0      0      0                              0
+* shutting down connection #0
+
+
+================================================================================
+# SCENARIO 9: Conditional write with stale If-Match -> 412 Precondition Failed (Requirement C2)
+# Command: curl.exe -v -X PUT http://127.0.0.1:5055/orders/a989fd1a-dce6-4dcc-9dbd-6f3abd5e8a71 -H Authorization: Bearer test-jwt-token-campus-user-2025 -H Content-Type: application/json -H If-Match: "stale-mismatched-etag-123" -d {"custom_notes": "Updated note: Room 204"}
+================================================================================
+*   Trying 127.0.0.1:5055...
+* Established connection to 127.0.0.1 (127.0.0.1 port 5055) from 127.0.0.1 port 63087 
+  % Total    % Received % Xferd  Average Speed  Time    Time    Time   Current
+                                 Dload  Upload  Total   Spent   Left   Speed
+
+  0      0   0      0   0      0      0      0                              0* using HTTP/1.x
+> PUT /orders/a989fd1a-dce6-4dcc-9dbd-6f3abd5e8a71 HTTP/1.1
+
+> Host: 127.0.0.1:5055
+
+> User-Agent: curl/8.21.0
+
+> Accept: */*
+
+> Authorization: Bearer test-jwt-token-campus-user-2025
+
+> Content-Type: application/json
+
+> If-Match: "stale-mismatched-etag-123"
+
+> Content-Length: 42
+
+> 
+
+} [42 bytes data]
+* upload completely sent off: 42 bytes
+* HTTP 1.0, assume close after body
+< HTTP/1.0 412 PRECONDITION FAILED
+
+< Server: Werkzeug/3.1.8 Python/3.13.5
+
+< Date: Sun, 20 Sep 2026 14:41:34 GMT
+
+< Content-Type: application/problem+json
+
+< Content-Length: 317
+
+< X-Content-Type-Options: nosniff
+
+< Strict-Transport-Security: max-age=31536000; includeSubDomains
+
+< Server: CampusEats-OrdersService/2.0
+
+< Access-Control-Allow-Origin: *
+
+< Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS, HEAD
+
+< Access-Control-Allow-Headers: Authorization, Content-Type, Accept, If-None-Match, If-Match, Idempotency-Key, X-HTTP-Method-Override, Accept-Encoding
+
+< Access-Control-Expose-Headers: Location, ETag, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset, Retry-After, Content-Encoding
+
+< X-RateLimit-Limit: 60
+
+< X-RateLimit-Remaining: 54
+
+< X-RateLimit-Reset: 1789915354
+
+< Connection: close
+
+< 
+
+{ [317 bytes data]
+
+100    359 100    317 100     42 136.3k  18502                              0
+100    359 100    317 100     42 127.7k  17333                              0
+100    359 100    317 100     42 119.7k  16241                              0
+* shutting down connection #0
+
+{"detail":"Resource has changed mid-air. Provided ETag '\"stale-mismatched-etag-123\"' does not match current '\"d3abd421144e8dca9e33b0101d43d634\"'.","instance":"/orders/a989fd1a-dce6-4dcc-9dbd-6f3abd5e8a71","status":412,"title":"Precondition Failed","type":"https://campuseats.internal/errors/precondition-failed"}
+
+
+================================================================================
+# SCENARIO 10: Conditional write with valid If-Match -> 200 OK with updated ETag (Requirement C2)
+# Command: curl.exe -v -X PUT http://127.0.0.1:5055/orders/a989fd1a-dce6-4dcc-9dbd-6f3abd5e8a71 -H Authorization: Bearer test-jwt-token-campus-user-2025 -H Content-Type: application/json -H If-Match: "d3abd421144e8dca9e33b0101d43d634" -d {"custom_notes": "Updated note: Room 204"}
+================================================================================
+*   Trying 127.0.0.1:5055...
+* Established connection to 127.0.0.1 (127.0.0.1 port 5055) from 127.0.0.1 port 63088 
+  % Total    % Received % Xferd  Average Speed  Time    Time    Time   Current
+                                 Dload  Upload  Total   Spent   Left   Speed
+
+  0      0   0      0   0      0      0      0                              0* using HTTP/1.x
+> PUT /orders/a989fd1a-dce6-4dcc-9dbd-6f3abd5e8a71 HTTP/1.1
+
+> Host: 127.0.0.1:5055
+
+> User-Agent: curl/8.21.0
+
+> Accept: */*
+
+> Authorization: Bearer test-jwt-token-campus-user-2025
+
+> Content-Type: application/json
+
+> If-Match: "d3abd421144e8dca9e33b0101d43d634"
+
+> Content-Length: 42
+
+> 
+
+} [42 bytes data]
+* upload completely sent off: 42 bytes
+* HTTP 1.0, assume close after body
+< HTTP/1.0 200 OK
+
+< Server: Werkzeug/3.1.8 Python/3.13.5
+
+< Date: Sun, 20 Sep 2026 14:41:34 GMT
+
+< Content-Type: application/json
+
+< Content-Length: 585
+
+< ETag: "b2670ca5f89cbd473b873d4e44e736f8"
+
+< X-Content-Type-Options: nosniff
+
+< Strict-Transport-Security: max-age=31536000; includeSubDomains
+
+< Server: CampusEats-OrdersService/2.0
+
+< Access-Control-Allow-Origin: *
+
+< Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS, HEAD
+
+< Access-Control-Allow-Headers: Authorization, Content-Type, Accept, If-None-Match, If-Match, Idempotency-Key, X-HTTP-Method-Override, Accept-Encoding
+
+< Access-Control-Expose-Headers: Location, ETag, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset, Retry-After, Content-Encoding
+
+< X-RateLimit-Limit: 60
+
+< X-RateLimit-Remaining: 53
+
+< X-RateLimit-Reset: 1789915354
+
+< Connection: close
+
+< 
+
+{ [585 bytes data]
+
+100    627 100    585 100     42 245.8k  18072                              0
+100    627 100    585 100     42 234.2k  17220                              0
+100    627 100    585 100     42 229.3k  16860                              0
+* shutting down connection #0
+
+{"cancellation_reason":null,"cancelled_at":null,"canteen_id":"b38ad05b-816e-4e22-b7c9-2b83c64fb9cb","custom_notes":"Updated note: Room 204","customer_id":"c0d3c259-0aac-4c19-acef-bbb7cbd9d9d3","delivery_fee":30.0,"id":"a989fd1a-dce6-4dcc-9dbd-6f3abd5e8a71","items":[{"item_name":"Chole Bhature Special","menu_item_id":"1e84ceb4-e952-47f6-b0f1-136805a9f5a6","quantity":2,"unit_price":120.0}],"ordered_at":"2026-09-20T14:41:34.553551+00:00","service_fee":15.0,"status":"placed","subtotal":240.0,"tax":12.0,"total_price":297.0,"updated_at":"2026-09-20T14:41:34.686739+00:00","version":2}
+
+
+================================================================================
+# SCENARIO 11: Read non-existent order -> 404 Not Found (Requirement B2)
+# Command: curl.exe -v -X GET http://127.0.0.1:5055/orders/c1f82545-84b8-45be-9873-983c54466e5d
+================================================================================
+Note: Unnecessary use of -X or --request, GET is already inferred.
+*   Trying 127.0.0.1:5055...
+* Established connection to 127.0.0.1 (127.0.0.1 port 5055) from 127.0.0.1 port 63090 
+  % Total    % Received % Xferd  Average Speed  Time    Time    Time   Current
+                                 Dload  Upload  Total   Spent   Left   Speed
+
+  0      0   0      0   0      0      0      0                              0* using HTTP/1.x
+> GET /orders/c1f82545-84b8-45be-9873-983c54466e5d HTTP/1.1
+
+> Host: 127.0.0.1:5055
+
+> User-Agent: curl/8.21.0
+
+> Accept: */*
+
+> 
+
+* Request completely sent off
+* HTTP 1.0, assume close after body
+< HTTP/1.0 404 NOT FOUND
+
+< Server: Werkzeug/3.1.8 Python/3.13.5
+
+< Date: Sun, 20 Sep 2026 14:41:34 GMT
+
+< Content-Type: application/problem+json
+
+< Content-Length: 243
+
+< X-Content-Type-Options: nosniff
+
+< Strict-Transport-Security: max-age=31536000; includeSubDomains
+
+< Server: CampusEats-OrdersService/2.0
+
+< Access-Control-Allow-Origin: *
+
+< Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS, HEAD
+
+< Access-Control-Allow-Headers: Authorization, Content-Type, Accept, If-None-Match, If-Match, Idempotency-Key, X-HTTP-Method-Override, Accept-Encoding
+
+< Access-Control-Expose-Headers: Location, ETag, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset, Retry-After, Content-Encoding
+
+< X-RateLimit-Limit: 60
+
+< X-RateLimit-Remaining: 54
+
+< X-RateLimit-Reset: 1789915354
+
+< Connection: close
+
+< 
+
+{ [243 bytes data]
+
+100    243 100    243   0      0 118.8k      0                              0
+100    243 100    243   0      0 114.1k      0                              0
+100    243 100    243   0      0 111.0k      0                              0
+* shutting down connection #0
+
+{"detail":"Order with ID 'c1f82545-84b8-45be-9873-983c54466e5d' was not found in the catalogue.","instance":"/orders/c1f82545-84b8-45be-9873-983c54466e5d","status":404,"title":"Not Found","type":"https://campuseats.internal/errors/not-found"}
+
+
+================================================================================
+# SCENARIO 12: State-changing sub-resource POST /orders/<id>/cancel -> 200 OK (Requirement A2)
+# Command: curl.exe -v -X POST http://127.0.0.1:5055/orders/a989fd1a-dce6-4dcc-9dbd-6f3abd5e8a71/cancel -H Authorization: Bearer test-jwt-token-campus-user-2025 -H Content-Type: application/json -d {"reason": "Canteen closing early"}
+================================================================================
+Note: Unnecessary use of -X or --request, POST is already inferred.
+*   Trying 127.0.0.1:5055...
+* Established connection to 127.0.0.1 (127.0.0.1 port 5055) from 127.0.0.1 port 63091 
+  % Total    % Received % Xferd  Average Speed  Time    Time    Time   Current
+                                 Dload  Upload  Total   Spent   Left   Speed
+
+  0      0   0      0   0      0      0      0                              0* using HTTP/1.x
+> POST /orders/a989fd1a-dce6-4dcc-9dbd-6f3abd5e8a71/cancel HTTP/1.1
+
+> Host: 127.0.0.1:5055
+
+> User-Agent: curl/8.21.0
+
+> Accept: */*
+
+> Authorization: Bearer test-jwt-token-campus-user-2025
+
+> Content-Type: application/json
+
+> Content-Length: 35
+
+> 
+
+} [35 bytes data]
+* upload completely sent off: 35 bytes
+* HTTP 1.0, assume close after body
+< HTTP/1.0 200 OK
+
+< Server: Werkzeug/3.1.8 Python/3.13.5
+
+< Date: Sun, 20 Sep 2026 14:41:34 GMT
+
+< Content-Type: application/json
+
+< Content-Length: 637
+
+< ETag: "06da4ebca6f32a1ba2c5daa00e2d0402"
+
+< X-Content-Type-Options: nosniff
+
+< Strict-Transport-Security: max-age=31536000; includeSubDomains
+
+< Server: CampusEats-OrdersService/2.0
+
+< Access-Control-Allow-Origin: *
+
+< Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS, HEAD
+
+< Access-Control-Allow-Headers: Authorization, Content-Type, Accept, If-None-Match, If-Match, Idempotency-Key, X-HTTP-Method-Override, Accept-Encoding
+
+< Access-Control-Expose-Headers: Location, ETag, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset, Retry-After, Content-Encoding
+
+< X-RateLimit-Limit: 60
+
+< X-RateLimit-Remaining: 52
+
+< X-RateLimit-Reset: 1789915354
+
+< Connection: close
+
+< 
+
+{ [637 bytes data]
+
+100    672 100    637 100     35 307.6k  17309                              0
+100    672 100    637 100     35 282.3k  15887                              0
+100    672 100    637 100     35 261.2k  14699                              0
+* shutting down connection #0
+
+{"cancellation_reason":"Canteen closing early","cancelled_at":"2026-09-20T14:41:34.759477+00:00","canteen_id":"b38ad05b-816e-4e22-b7c9-2b83c64fb9cb","custom_notes":"Updated note: Room 204","customer_id":"c0d3c259-0aac-4c19-acef-bbb7cbd9d9d3","delivery_fee":30.0,"id":"a989fd1a-dce6-4dcc-9dbd-6f3abd5e8a71","items":[{"item_name":"Chole Bhature Special","menu_item_id":"1e84ceb4-e952-47f6-b0f1-136805a9f5a6","quantity":2,"unit_price":120.0}],"ordered_at":"2026-09-20T14:41:34.553551+00:00","service_fee":15.0,"status":"cancelled","subtotal":240.0,"tax":12.0,"total_price":297.0,"updated_at":"2026-09-20T14:41:34.759477+00:00","version":3}
+
+
+================================================================================
+# SCENARIO 13: Invalid state transition (cancelling already cancelled order) -> 409 Conflict (Requirement B2)
+# Command: curl.exe -v -X POST http://127.0.0.1:5055/orders/a989fd1a-dce6-4dcc-9dbd-6f3abd5e8a71/cancel -H Authorization: Bearer test-jwt-token-campus-user-2025 -H Content-Type: application/json -d {"reason": "Canteen closing early"}
+================================================================================
+Note: Unnecessary use of -X or --request, POST is already inferred.
+*   Trying 127.0.0.1:5055...
+* Established connection to 127.0.0.1 (127.0.0.1 port 5055) from 127.0.0.1 port 63092 
+  % Total    % Received % Xferd  Average Speed  Time    Time    Time   Current
+                                 Dload  Upload  Total   Spent   Left   Speed
+
+  0      0   0      0   0      0      0      0                              0* using HTTP/1.x
+> POST /orders/a989fd1a-dce6-4dcc-9dbd-6f3abd5e8a71/cancel HTTP/1.1
+
+> Host: 127.0.0.1:5055
+
+> User-Agent: curl/8.21.0
+
+> Accept: */*
+
+> Authorization: Bearer test-jwt-token-campus-user-2025
+
+> Content-Type: application/json
+
+> Content-Length: 35
+
+> 
+
+} [35 bytes data]
+* upload completely sent off: 35 bytes
+* HTTP 1.0, assume close after body
+< HTTP/1.0 409 CONFLICT
+
+< Server: Werkzeug/3.1.8 Python/3.13.5
+
+< Date: Sun, 20 Sep 2026 14:41:34 GMT
+
+< Content-Type: application/problem+json
+
+< Content-Length: 259
+
+< X-Content-Type-Options: nosniff
+
+< Strict-Transport-Security: max-age=31536000; includeSubDomains
+
+< Server: CampusEats-OrdersService/2.0
+
+< Access-Control-Allow-Origin: *
+
+< Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS, HEAD
+
+< Access-Control-Allow-Headers: Authorization, Content-Type, Accept, If-None-Match, If-Match, Idempotency-Key, X-HTTP-Method-Override, Accept-Encoding
+
+< Access-Control-Expose-Headers: Location, ETag, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset, Retry-After, Content-Encoding
+
+< X-RateLimit-Limit: 60
+
+< X-RateLimit-Remaining: 51
+
+< X-RateLimit-Reset: 1789915354
+
+< Connection: close
+
+< 
+
+{ [259 bytes data]
+
+100    294 100    259 100     35 130.4k  18050                              0
+100    294 100    259 100     35 124.4k  17224                              0
+100    294 100    259 100     35 117.5k  16263                              0
+* shutting down connection #0
+
+{"detail":"Order 'a989fd1a-dce6-4dcc-9dbd-6f3abd5e8a71' has already been cancelled previously.","instance":"/orders/a989fd1a-dce6-4dcc-9dbd-6f3abd5e8a71/cancel","status":409,"title":"State Conflict","type":"https://campuseats.internal/errors/state-conflict"}
+
+
+================================================================================
+# SCENARIO 14: Delete order -> 204 No Content with empty body (Requirement A1, B2)
+# Command: curl.exe -v -X DELETE http://127.0.0.1:5055/orders/a989fd1a-dce6-4dcc-9dbd-6f3abd5e8a71 -H Authorization: Bearer test-jwt-token-campus-user-2025
+================================================================================
+*   Trying 127.0.0.1:5055...
+* Established connection to 127.0.0.1 (127.0.0.1 port 5055) from 127.0.0.1 port 63093 
+  % Total    % Received % Xferd  Average Speed  Time    Time    Time   Current
+                                 Dload  Upload  Total   Spent   Left   Speed
+
+  0      0   0      0   0      0      0      0                              0* using HTTP/1.x
+> DELETE /orders/a989fd1a-dce6-4dcc-9dbd-6f3abd5e8a71 HTTP/1.1
+
+> Host: 127.0.0.1:5055
+
+> User-Agent: curl/8.21.0
+
+> Accept: */*
+
+> Authorization: Bearer test-jwt-token-campus-user-2025
+
+> 
+
+* Request completely sent off
+* HTTP 1.0, assume close after body
+< HTTP/1.0 204 NO CONTENT
+
+< Server: Werkzeug/3.1.8 Python/3.13.5
+
+< Date: Sun, 20 Sep 2026 14:41:34 GMT
+
+< Content-Type: text/html; charset=utf-8
+
+< X-Content-Type-Options: nosniff
+
+< Strict-Transport-Security: max-age=31536000; includeSubDomains
+
+< Server: CampusEats-OrdersService/2.0
+
+< Access-Control-Allow-Origin: *
+
+< Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS, HEAD
+
+< Access-Control-Allow-Headers: Authorization, Content-Type, Accept, If-None-Match, If-Match, Idempotency-Key, X-HTTP-Method-Override, Accept-Encoding
+
+< Access-Control-Expose-Headers: Location, ETag, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset, Retry-After, Content-Encoding
+
+< X-RateLimit-Limit: 60
+
+< X-RateLimit-Remaining: 50
+
+< X-RateLimit-Reset: 1789915354
+
+< Connection: close
+
+< 
+
+
+  0      0   0      0   0      0      0      0                              0
+  0      0   0      0   0      0      0      0                              0
+  0      0   0      0   0      0      0      0                              0
+* shutting down connection #0
+
+
+================================================================================
+# SCENARIO 15: OPTIONS /orders -> Allow header and CORS preflight (Requirement A5, B6)
+# Command: curl.exe -v -X OPTIONS http://127.0.0.1:5055/orders
+================================================================================
+*   Trying 127.0.0.1:5055...
+* Established connection to 127.0.0.1 (127.0.0.1 port 5055) from 127.0.0.1 port 63094 
+  % Total    % Received % Xferd  Average Speed  Time    Time    Time   Current
+                                 Dload  Upload  Total   Spent   Left   Speed
+
+  0      0   0      0   0      0      0      0                              0* using HTTP/1.x
+> OPTIONS /orders HTTP/1.1
+
+> Host: 127.0.0.1:5055
+
+> User-Agent: curl/8.21.0
+
+> Accept: */*
+
+> 
+
+* Request completely sent off
+* HTTP 1.0, assume close after body
+< HTTP/1.0 204 NO CONTENT
+
+< Server: Werkzeug/3.1.8 Python/3.13.5
+
+< Date: Sun, 20 Sep 2026 14:41:34 GMT
+
+< Content-Type: text/html; charset=utf-8
+
+< Allow: GET, POST, OPTIONS, HEAD
+
+< X-Content-Type-Options: nosniff
+
+< Strict-Transport-Security: max-age=31536000; includeSubDomains
+
+< Server: CampusEats-OrdersService/2.0
+
+< Access-Control-Allow-Origin: *
+
+< Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS, HEAD
+
+< Access-Control-Allow-Headers: Authorization, Content-Type, Accept, If-None-Match, If-Match, Idempotency-Key, X-HTTP-Method-Override, Accept-Encoding
+
+< Access-Control-Expose-Headers: Location, ETag, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset, Retry-After, Content-Encoding
+
+< X-RateLimit-Limit: 60
+
+< X-RateLimit-Remaining: 53
+
+< X-RateLimit-Reset: 1789915354
+
+< Connection: close
+
+< 
+
+
+  0      0   0      0   0      0      0      0                              0
+  0      0   0      0   0      0      0      0                              0
+  0      0   0      0   0      0      0      0                              0
+* shutting down connection #0
+
+
+================================================================================
+# SCENARIO 16: Constrained client method override (POST with X-HTTP-Method-Override: DELETE) -> 204 No Content (Requirement A5)
+# Command: curl.exe -v -X POST http://127.0.0.1:5055/orders/9154903a-4383-45a1-9b0c-9221e9ebeb1a -H Authorization: Bearer test-jwt-token-campus-user-2025 -H X-HTTP-Method-Override: DELETE
+================================================================================
+*   Trying 127.0.0.1:5055...
+* Established connection to 127.0.0.1 (127.0.0.1 port 5055) from 127.0.0.1 port 63096 
+  % Total    % Received % Xferd  Average Speed  Time    Time    Time   Current
+                                 Dload  Upload  Total   Spent   Left   Speed
+
+  0      0   0      0   0      0      0      0                              0* using HTTP/1.x
+> POST /orders/9154903a-4383-45a1-9b0c-9221e9ebeb1a HTTP/1.1
+
+> Host: 127.0.0.1:5055
+
+> User-Agent: curl/8.21.0
+
+> Accept: */*
+
+> Authorization: Bearer test-jwt-token-campus-user-2025
+
+> X-HTTP-Method-Override: DELETE
+
+> 
+
+* Request completely sent off
+* HTTP 1.0, assume close after body
+< HTTP/1.0 204 NO CONTENT
+
+< Server: Werkzeug/3.1.8 Python/3.13.5
+
+< Date: Sun, 20 Sep 2026 14:41:34 GMT
+
+< Content-Type: text/html; charset=utf-8
+
+< X-Content-Type-Options: nosniff
+
+< Strict-Transport-Security: max-age=31536000; includeSubDomains
+
+< Server: CampusEats-OrdersService/2.0
+
+< Access-Control-Allow-Origin: *
+
+< Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS, HEAD
+
+< Access-Control-Allow-Headers: Authorization, Content-Type, Accept, If-None-Match, If-Match, Idempotency-Key, X-HTTP-Method-Override, Accept-Encoding
+
+< Access-Control-Expose-Headers: Location, ETag, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset, Retry-After, Content-Encoding
+
+< X-RateLimit-Limit: 60
+
+< X-RateLimit-Remaining: 48
+
+< X-RateLimit-Reset: 1789915354
+
+< Connection: close
+
+< 
+
+
+  0      0   0      0   0      0      0      0                              0
+  0      0   0      0   0      0      0      0                              0
+  0      0   0      0   0      0      0      0                              0
+* shutting down connection #0
+
+
+================================================================================
+# SCENARIO 17: Singular URL redirect -> 301 Moved Permanently with Location: /orders/<id> (Requirement B2, Question 8)
+# Command: curl.exe -v -X GET http://127.0.0.1:5055/order/c1f82545-84b8-45be-9873-983c54466e5d
+================================================================================
+Note: Unnecessary use of -X or --request, GET is already inferred.
+*   Trying 127.0.0.1:5055...
+* Established connection to 127.0.0.1 (127.0.0.1 port 5055) from 127.0.0.1 port 63097 
+  % Total    % Received % Xferd  Average Speed  Time    Time    Time   Current
+                                 Dload  Upload  Total   Spent   Left   Speed
+
+  0      0   0      0   0      0      0      0                              0* using HTTP/1.x
+> GET /order/c1f82545-84b8-45be-9873-983c54466e5d HTTP/1.1
+
+> Host: 127.0.0.1:5055
+
+> User-Agent: curl/8.21.0
+
+> Accept: */*
+
+> 
+
+* Request completely sent off
+* HTTP 1.0, assume close after body
+< HTTP/1.0 301 MOVED PERMANENTLY
+
+< Server: Werkzeug/3.1.8 Python/3.13.5
+
+< Date: Sun, 20 Sep 2026 14:41:34 GMT
+
+< Content-Type: text/html; charset=utf-8
+
+< Content-Length: 0
+
+< Location: /orders/c1f82545-84b8-45be-9873-983c54466e5d
+
+< X-Content-Type-Options: nosniff
+
+< Strict-Transport-Security: max-age=31536000; includeSubDomains
+
+< Server: CampusEats-OrdersService/2.0
+
+< Access-Control-Allow-Origin: *
+
+< Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS, HEAD
+
+< Access-Control-Allow-Headers: Authorization, Content-Type, Accept, If-None-Match, If-Match, Idempotency-Key, X-HTTP-Method-Override, Accept-Encoding
+
+< Access-Control-Expose-Headers: Location, ETag, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset, Retry-After, Content-Encoding
+
+< X-RateLimit-Limit: 60
+
+< X-RateLimit-Remaining: 52
+
+< X-RateLimit-Reset: 1789915354
+
+< Connection: close
+
+< 
+
+
+  0      0   0      0   0      0      0      0                              0
+  0      0   0      0   0      0      0      0                              0
+  0      0   0      0   0      0      0      0                              0
+* shutting down connection #0

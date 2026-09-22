@@ -1,0 +1,592 @@
+openapi: 3.0.3
+info:
+  title: CampusEats Orders Microservice API
+  description: >
+    RESTful specification for CS 543 Web Services · Assignment 5.
+    Demonstrates HTTP methods, response codes, caching (ETag / If-None-Match),
+    optimistic locking (If-Match / 412), idempotency, CORS, rate limiting, and security headers.
+  version: 2.0.0
+  contact:
+    name: "Team 11: Nandini Kanaujiya, Radhika Verma, Alka Jha, Alok Mishra"
+
+servers:
+  - url: http://127.0.0.1:5000
+    description: Local Development Server
+  - url: https://orders.campuseats.internal
+    description: Production Internal Gateway (HTTPS enforced)
+
+paths:
+  /orders:
+    post:
+      summary: Create an order with payment processing and idempotency
+      operationId: createOrder
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          required: false
+          description: Client-provided UUID to safely retry order creation without duplicate billing.
+          schema:
+            type: string
+        - name: Accept
+          in: header
+          required: false
+          schema:
+            type: string
+            default: application/json
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderCreatePayload'
+      responses:
+        '201':
+          description: Order successfully created and payment authorized.
+          headers:
+            Location:
+              $ref: '#/components/headers/LocationHeader'
+            ETag:
+              $ref: '#/components/headers/ETagHeader'
+            X-RateLimit-Limit:
+              $ref: '#/components/headers/RateLimitLimit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/headers/RateLimitRemaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/headers/RateLimitReset'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '406':
+          $ref: '#/components/responses/406NotAcceptable'
+        '422':
+          $ref: '#/components/responses/422Unprocessable'
+        '429':
+          $ref: '#/components/responses/429TooManyRequests'
+        '502':
+          description: Bad Gateway — external payment gateway unavailable.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+
+    get:
+      summary: Filtered, sorted, and paginated order catalogue (Pure Read)
+      operationId: listOrders
+      parameters:
+        - name: customer_id
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [placed, preparing, ready_for_pickup, out_for_delivery, delivered, cancelled]
+        - name: sort
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [ordered_at_desc, ordered_at_asc, total_price_asc, total_price_desc]
+            default: ordered_at_desc
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 10
+        - name: Accept
+          in: header
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Paginated collection of orders matching filter criteria.
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                example: "no-store"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  orders:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Order'
+                  pagination:
+                    type: object
+                    properties:
+                      total_items:
+                        type: integer
+                      page:
+                        type: integer
+                      limit:
+                        type: integer
+                      total_pages:
+                        type: integer
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '406':
+          $ref: '#/components/responses/406NotAcceptable'
+        '429':
+          $ref: '#/components/responses/429TooManyRequests'
+
+    options:
+      summary: Retrieve allowed HTTP verbs on /orders
+      operationId: optionsOrders
+      responses:
+        '204':
+          description: Method discovery response
+          headers:
+            Allow:
+              schema:
+                type: string
+                example: "GET, POST, OPTIONS, HEAD"
+
+  /orders/{order_id}:
+    get:
+      summary: Read single order representation (Supports conditional 304 caching)
+      operationId: getOrder
+      parameters:
+        - name: order_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: If-None-Match
+          in: header
+          required: false
+          description: ETag from previous fetch. Returns 304 Not Modified if unchanged.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Order found and returned with caching headers.
+          headers:
+            ETag:
+              $ref: '#/components/headers/ETagHeader'
+            Cache-Control:
+              schema:
+                type: string
+                example: "private, max-age=60, must-revalidate"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        '304':
+          description: Not Modified — client's cached representation is still fresh. Empty body.
+          headers:
+            ETag:
+              $ref: '#/components/headers/ETagHeader'
+            Cache-Control:
+              schema:
+                type: string
+                example: "private, max-age=60, must-revalidate"
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '406':
+          $ref: '#/components/responses/406NotAcceptable'
+        '429':
+          $ref: '#/components/responses/429TooManyRequests'
+
+    put:
+      summary: Conditional write / replacement of order resource (Optimistic Locking via If-Match)
+      operationId: updateOrder
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: order_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: If-Match
+          in: header
+          required: true
+          description: Mandatory ETag for concurrency check. Returns 412 if stale or missing.
+          schema:
+            type: string
+        - name: X-HTTP-Method-Override
+          in: header
+          required: false
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderUpdatePayload'
+      responses:
+        '200':
+          description: Order successfully replaced. New ETag issued.
+          headers:
+            ETag:
+              $ref: '#/components/headers/ETagHeader'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '409':
+          $ref: '#/components/responses/409Conflict'
+        '412':
+          $ref: '#/components/responses/412PreconditionFailed'
+        '422':
+          $ref: '#/components/responses/422Unprocessable'
+        '429':
+          $ref: '#/components/responses/429TooManyRequests'
+
+    delete:
+      summary: Delete an order record
+      operationId: deleteOrder
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: order_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: X-HTTP-Method-Override
+          in: header
+          required: false
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Order successfully deleted. Body is completely empty.
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '409':
+          $ref: '#/components/responses/409Conflict'
+        '429':
+          $ref: '#/components/responses/429TooManyRequests'
+
+    options:
+      summary: Retrieve allowed HTTP verbs on /orders/{order_id}
+      operationId: optionsOrderItem
+      parameters:
+        - name: order_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Method discovery response
+          headers:
+            Allow:
+              schema:
+                type: string
+                example: "GET, PUT, DELETE, OPTIONS, HEAD"
+
+  /orders/{order_id}/cancel:
+    post:
+      summary: Non-CRUD state change sub-resource to transition order to cancelled state
+      operationId: cancelOrder
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: order_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [reason]
+              properties:
+                reason:
+                  type: string
+                  minLength: 3
+                  example: "Customer selected wrong delivery point"
+      responses:
+        '200':
+          description: Order cancelled successfully.
+          headers:
+            ETag:
+              $ref: '#/components/headers/ETagHeader'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '409':
+          $ref: '#/components/responses/409Conflict'
+        '429':
+          $ref: '#/components/responses/429TooManyRequests'
+
+  /order/{order_id}:
+    get:
+      summary: Legacy singular URL redirecting to canonical plural resource
+      operationId: redirectSingularOrder
+      parameters:
+        - name: order_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '301':
+          description: Moved Permanently — client redirected to /orders/{order_id}
+          headers:
+            Location:
+              schema:
+                type: string
+                example: "/orders/d729bf70-2ac6-4cdb-ab17-65691f8604e8"
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  headers:
+    LocationHeader:
+      description: URI of newly created resource or target of a redirect.
+      schema:
+        type: string
+        example: "/orders/d729bf70-2ac6-4cdb-ab17-65691f8604e8"
+    ETagHeader:
+      description: RFC 7232 strong entity tag representing resource state version.
+      schema:
+        type: string
+        example: '"c8f1e2908f9c15b945417cb34a7f0e34"'
+    RateLimitLimit:
+      description: Maximum requests permitted within current 1-minute window.
+      schema:
+        type: integer
+        example: 60
+    RateLimitRemaining:
+      description: Number of requests remaining in current window.
+      schema:
+        type: integer
+        example: 58
+    RateLimitReset:
+      description: Epoch timestamp when rate limit counter resets.
+      schema:
+        type: integer
+        example: 1790000000
+
+  responses:
+    400BadRequest:
+      description: Bad Request — malformed JSON, invalid UUID, or missing parameters.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+    401Unauthorized:
+      description: Unauthorized — missing or invalid Bearer authentication token.
+      headers:
+        WWW-Authenticate:
+          schema:
+            type: string
+            example: 'Bearer realm="CampusEats Orders API"'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+    404NotFound:
+      description: Not Found — resource does not exist.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+    406NotAcceptable:
+      description: Not Acceptable — client Accept header cannot be satisfied.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+    409Conflict:
+      description: Conflict — state machine invariant violated (e.g. order already delivered).
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+    412PreconditionFailed:
+      description: Precondition Failed — If-Match ETag is missing or stale.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+    422Unprocessable:
+      description: Unprocessable Entity — syntactically valid JSON violates domain rules.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+    429TooManyRequests:
+      description: Too Many Requests — per-client rate limit budget exceeded.
+      headers:
+        Retry-After:
+          schema:
+            type: integer
+            example: 60
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+
+  schemas:
+    OrderCreatePayload:
+      type: object
+      required: [customer_id, canteen_id, items]
+      properties:
+        customer_id:
+          type: string
+          format: uuid
+        canteen_id:
+          type: string
+          format: uuid
+        items:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/LineItem'
+        delivery_fee:
+          type: number
+          default: 30.00
+        payment_token:
+          type: string
+        custom_notes:
+          type: string
+
+    OrderUpdatePayload:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/LineItem'
+        custom_notes:
+          type: string
+        delivery_fee:
+          type: number
+
+    LineItem:
+      type: object
+      required: [menu_item_id, item_name, quantity, unit_price]
+      properties:
+        menu_item_id:
+          type: string
+          format: uuid
+        item_name:
+          type: string
+        quantity:
+          type: integer
+          minimum: 1
+        unit_price:
+          type: number
+          minimum: 0.0
+
+    Order:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        customer_id:
+          type: string
+          format: uuid
+        canteen_id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [placed, preparing, ready_for_pickup, out_for_delivery, delivered, cancelled]
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/LineItem'
+        subtotal:
+          type: number
+        service_fee:
+          type: number
+        delivery_fee:
+          type: number
+        tax:
+          type: number
+        total_price:
+          type: number
+        ordered_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        cancelled_at:
+          type: string
+          format: date-time
+          nullable: true
+        cancellation_reason:
+          type: string
+          nullable: true
+        custom_notes:
+          type: string
+        version:
+          type: integer
+
+    ProblemDetails:
+      type: object
+      required: [type, title, status, detail]
+      properties:
+        type:
+          type: string
+          format: uri
+        title:
+          type: string
+        status:
+          type: integer
+        detail:
+          type: string
+        instance:
+          type: string
