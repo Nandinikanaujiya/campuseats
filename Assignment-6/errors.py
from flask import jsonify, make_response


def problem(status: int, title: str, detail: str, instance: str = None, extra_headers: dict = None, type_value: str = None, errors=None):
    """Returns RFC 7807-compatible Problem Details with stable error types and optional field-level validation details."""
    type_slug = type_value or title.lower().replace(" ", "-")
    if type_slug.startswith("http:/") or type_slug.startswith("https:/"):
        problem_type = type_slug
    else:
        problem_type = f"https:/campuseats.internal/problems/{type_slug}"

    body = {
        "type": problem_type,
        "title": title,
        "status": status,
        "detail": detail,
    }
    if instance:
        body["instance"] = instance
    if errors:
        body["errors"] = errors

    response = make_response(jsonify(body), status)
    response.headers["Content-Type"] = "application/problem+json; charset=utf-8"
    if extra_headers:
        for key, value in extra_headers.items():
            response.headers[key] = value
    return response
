@@ -1,0 +1,207 @@
+import uuid
+import json
+import hashlib
+from datetime import datetime, timezone
+from typing import Dict, Any, Tuple, Optional, List
+
+
+def is_valid_uuid(val: str) -> bool:
+    try:
+        uuid.UUID(str(val))
+        return True
+    except (ValueError, TypeError, AttributeError):
+        return False
+
+
+def _append_error(errors: List[Dict[str, str]], field: str, message: str) -> None:
+    errors.append({"field": field, "message": message})
+
+
+def validate_order_payload(data: Any) -> Tuple[bool, Optional[str], int, List[Dict[str, str]]]:
+    errors: List[Dict[str, str]] = []
+    if not isinstance(data, dict):
+        return False, "Request body must be a JSON object.", 400, [{"field": "body", "message": "must be a JSON object"}]
+
+    required = ["customer_id", "canteen_id", "items", "address"]
+    for field in required:
+        if field not in data:
+            _append_error(errors, field, "is required")
+
+    if "customer_id" in data and data["customer_id"] is not None and not is_valid_uuid(data["customer_id"]):
+        _append_error(errors, "customer_id", "must be a valid UUID")
+    if "canteen_id" in data and data["canteen_id"] is not None and not is_valid_uuid(data["canteen_id"]):
+        _append_error(errors, "canteen_id", "must be a valid UUID")
+
+    items = data.get("items")
+    if items is None:
+        pass
+    elif not isinstance(items, list):
+        _append_error(errors, "items", "must be a JSON array")
+    elif len(items) == 0:
+        _append_error(errors, "items", "must contain at least one item")
+    else:
+        for idx, item in enumerate(items):
+            if not isinstance(item, dict):
+                _append_error(errors, f"items[{idx}]", "must be an object")
+                continue
+            if "menu_item_id" not in item:
+                _append_error(errors, f"items[{idx}].menu_item_id", "is required")
+            elif not is_valid_uuid(item["menu_item_id"]):
+                _append_error(errors, f"items[{idx}].menu_item_id", "must be a valid UUID")
+            if "item_name" not in item:
+                _append_error(errors, f"items[{idx}].item_name", "is required")
+            if "quantity" not in item:
+                _append_error(errors, f"items[{idx}].quantity", "is required")
+            else:
+                qty = item["quantity"]
+                if isinstance(qty, bool) or not isinstance(qty, int) or qty < 1:
+                    _append_error(errors, f"items[{idx}].quantity", "must be an integer >= 1")
+            if "unit_price" not in item:
+                _append_error(errors, f"items[{idx}].unit_price", "is required")
+            else:
+                price = item["unit_price"]
+                if not isinstance(price, (int, float)) or price < 0:
+                    _append_error(errors, f"items[{idx}].unit_price", "must be a number >= 0")
+
+    address = data.get("address")
+    if "address" in data:
+        if not isinstance(address, str) or not address.strip():
+            _append_error(errors, "address", "is required and must not be blank")
+
+    if errors:
+        if any(e["field"] == "items" and e["message"] == "must contain at least one item" for e in errors):
+            return False, "Order items must not be empty.", 422, errors
+        return False, "Request validation failed.", 422, errors
+
+    return True, None, 200, []
+
+
+def validate_update_payload(data: Any) -> Tuple[bool, Optional[str], int, List[Dict[str, str]]]:
+    errors: List[Dict[str, str]] = []
+    if not isinstance(data, dict):
+        return False, "Request body must be a JSON object.", 400, [{"field": "body", "message": "must be a JSON object"}]
+
+    if "custom_notes" in data and data["custom_notes"] is not None and not isinstance(data["custom_notes"], str):
+        _append_error(errors, "custom_notes", "must be a string")
+    if "address" in data and data["address"] is not None and (not isinstance(data["address"], str) or not data["address"].strip()):
+        _append_error(errors, "address", "must be a non-blank string")
+    if "items" in data:
+        items = data["items"]
+        if not isinstance(items, list) or len(items) == 0:
+            _append_error(errors, "items", "must be a non-empty array")
+        else:
+            for idx, item in enumerate(items):
+                if not isinstance(item, dict):
+                    _append_error(errors, f"items[{idx}]", "must be an object")
+                    continue
+                if "quantity" in item:
+                    qty = item["quantity"]
+                    if isinstance(qty, bool) or not isinstance(qty, int) or qty < 1:
+                        _append_error(errors, f"items[{idx}].quantity", "must be an integer >= 1")
+
+    if errors:
+        return False, "Request validation failed.", 422, errors
+    return True, None, 200, []
+
+
+def validate_cancellation_payload(data: Any) -> Tuple[bool, Optional[str], int, List[Dict[str, str]]]:
+    errors: List[Dict[str, str]] = []
+    if not isinstance(data, dict):
+        return False, "Request body must be a JSON object.", 400, [{"field": "body", "message": "must be a JSON object"}]
+    reason = data.get("reason")
+    if not reason or not isinstance(reason, str) or len(reason.strip()) < 3:
+        _append_error(errors, "reason", "must be a string of at least 3 characters")
+    if errors:
+        return False, "Request validation failed.", 422, errors
+    return True, None, 200, []
+
+
+class Order:
+    def __init__(
+        self,
+        customer_id: str,
+        canteen_id: str,
+        items: List[Dict[str, Any]],
+        delivery_fee: float = 30.00,
+        payment_token: Optional[str] = None,
+        custom_notes: Optional[str] = None,
+        address: Optional[str] = None,
+        order_id: Optional[str] = None,
+    ):
+        self.id = order_id or str(uuid.uuid4())
+        self.customer_id = customer_id
+        self.canteen_id = canteen_id
+        self.status = "placed"
+        self.items = items
+        self.custom_notes = custom_notes
+        self.address = address or ""
+        self.service_fee = 15.00
+        self.delivery_fee = round(float(delivery_fee), 2)
+        self._calculate_total()
+
+        now = datetime.now(timezone.utc).isoformat()
+        self.ordered_at = now
+        self.updated_at = now
+        self.cancelled_at: Optional[str] = None
+        self.cancellation_reason: Optional[str] = None
+        self.version = 1
+        self.raw_payment_token = payment_token or "tok_simulated_secure"
+
+    def _calculate_total(self) -> None:
+        self.subtotal = round(sum(float(item["unit_price"]) * int(item["quantity"]) for item in self.items), 2)
+        self.tax = round(self.subtotal * 0.05, 2)
+        self.total_price = round(self.subtotal + self.service_fee + self.delivery_fee + self.tax, 2)
+
+    def compute_etag(self) -> str:
+        data = {
+            "id": self.id,
+            "version": self.version,
+            "status": self.status,
+            "total_price": self.total_price,
+            "custom_notes": self.custom_notes,
+            "updated_at": self.updated_at,
+        }
+        digest = hashlib.md5(json.dumps(data, sort_keys=True).encode("utf-8")).hexdigest()
+        return f'"{digest}"'
+
+    def replace(self, data: Dict[str, Any]) -> None:
+        if "custom_notes" in data:
+            self.custom_notes = data["custom_notes"]
+        if "address" in data:
+            self.address = data["address"]
+        if "items" in data:
+            self.items = data["items"]
+            self._calculate_total()
+        self.version += 1
+        self.updated_at = datetime.now(timezone.utc).isoformat()
+
+    def cancel(self, reason: str) -> None:
+        self.status = "cancelled"
+        now = datetime.now(timezone.utc).isoformat()
+        self.cancelled_at = now
+        self.updated_at = now
+        self.cancellation_reason = reason.strip()
+        self.version += 1
+
+    def as_json(self) -> Dict[str, Any]:
+        result = {
+            "id": self.id,
+            "customer_id": self.customer_id,
+            "canteen_id": self.canteen_id,
+            "status": self.status,
+            "items": self.items,
+            "subtotal": self.subtotal,
+            "service_fee": self.service_fee,
+            "delivery_fee": self.delivery_fee,
+            "tax": self.tax,
+            "total_price": self.total_price,
+            "ordered_at": self.ordered_at,
+            "updated_at": self.updated_at,
+            "cancelled_at": self.cancelled_at,
+            "cancellation_reason": self.cancellation_reason,
+            "version": self.version,
+            "address": self.address,
+        }
+        if self.custom_notes:
+            result["custom_notes"] = self.custom_notes
+        return result
