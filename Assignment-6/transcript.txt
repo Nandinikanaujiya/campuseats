@@ -1,0 +1,613 @@
+# ==============================================================================
+# CS 543 Web Services · Assignment 6 — Honest responses: status codes, errors & validation
+# Live Verified curl -i Execution Transcript
+# Team 11: Nandini Kanaujiya (20251651061), Radhika Verma (20251651075), Alka Jha (20251651013), Alok Mishra (20251651014)
+# Service: CampusEats Orders Microservice
+# Target: http://127.0.0.1:5066
+# ==============================================================================
+
+
+================================================================================
+# D1. SUCCESS PATH: POST /orders -> 201 Created with Location header, ETag, and JSON body (Requirement A1, A3, C4)
+# Command: curl.exe -i -X POST http://127.0.0.1:5066/orders -H Authorization: Bearer test-jwt-token -H Content-Type: application/json -d {"customer_id": "c0d3c259-0aac-4c19-acef-bbb7cbd9d9d3", "canteen_id": "b38ad05b-816e-4e22-b7c9-2b83c64fb9cb", "address": "Hostel 4, Room 201, South Campus", "items": [{"menu_item_id": "1e84ceb4-e952-47f6-b0f1-136805a9f5a6", "item_name": "Paneer Butter Masala Roll", "quantity": 2, "unit_price": 95.0}], "delivery_fee": 25.0, "custom_notes": "Extra mint chutney please"}
+================================================================================
+HTTP/1.1 201 CREATED
+Server: Werkzeug/3.1.8 Python/3.13.5
+Date: Sun, 11 Oct 2026 08:52:11 GMT
+Content-Type: application/json; charset=utf-8
+Content-Length: 635
+Location: /orders/94f1161f-aa8e-4b0f-95bb-5d302770c9e0
+ETag: "f7f9121e67e2a3a13d1dc46f03fcad01"
+X-Content-Type-Options: nosniff
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+Server: CampusEats-OrdersService/2.0
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS, HEAD
+Access-Control-Allow-Headers: Authorization, Content-Type, Accept, If-None-Match, If-Match, Idempotency-Key, X-HTTP-Method-Override, X-Simulate-Outage
+Access-Control-Expose-Headers: Location, ETag, X-RateLimit-Limit, X-RateLimit-Remaining, Retry-After
+X-RateLimit-Limit: 60
+X-RateLimit-Remaining: 59
+Connection: close
+
+{"address":"Hostel 4, Room 201, South Campus","cancellation_reason":null,"cancelled_at":null,"canteen_id":"b38ad05b-816e-4e22-b7c9-2b83c64fb9cb","custom_notes":"Extra mint chutney please","customer_id":"c0d3c259-0aac-4c19-acef-bbb7cbd9d9d3","delivery_fee":25.0,"id":"94f1161f-aa8e-4b0f-95bb-5d302770c9e0","items":[{"item_name":"Paneer Butter Masala Roll","menu_item_id":"1e84ceb4-e952-47f6-b0f1-136805a9f5a6","quantity":2,"unit_price":95.0}],"ordered_at":"2026-10-11T08:52:11.272105+00:00","service_fee":15.0,"status":"placed","subtotal":190.0,"tax":9.5,"total_price":239.5,"updated_at":"2026-10-11T08:52:11.272105+00:00","version":1}
+
+
+================================================================================
+# D2. FAILURE 1: Missing Bearer Token -> 401 Unauthorized with WWW-Authenticate and Problem Details (Requirement B1, B2)
+# Command: curl.exe -i -X POST http://127.0.0.1:5066/orders -H Content-Type: application/json -d {"customer_id": "c0d3c259-0aac-4c19-acef-bbb7cbd9d9d3", "canteen_id": "b38ad05b-816e-4e22-b7c9-2b83c64fb9cb", "address": "Hostel 4, Room 201, South Campus", "items": [{"menu_item_id": "1e84ceb4-e952-47f6-b0f1-136805a9f5a6", "item_name": "Paneer Butter Masala Roll", "quantity": 2, "unit_price": 95.0}], "delivery_fee": 25.0, "custom_notes": "Extra mint chutney please"}
+================================================================================
+HTTP/1.1 401 UNAUTHORIZED
+Server: Werkzeug/3.1.8 Python/3.13.5
+Date: Sun, 11 Oct 2026 08:52:11 GMT
+Content-Type: application/problem+json; charset=utf-8
+Content-Length: 184
+WWW-Authenticate: Bearer realm="CampusEats Orders API"
+X-Content-Type-Options: nosniff
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+Server: CampusEats-OrdersService/2.0
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS, HEAD
+Access-Control-Allow-Headers: Authorization, Content-Type, Accept, If-None-Match, If-Match, Idempotency-Key, X-HTTP-Method-Override, X-Simulate-Outage
+Access-Control-Expose-Headers: Location, ETag, X-RateLimit-Limit, X-RateLimit-Remaining, Retry-After
+X-RateLimit-Limit: 60
+X-RateLimit-Remaining: 59
+Connection: close
+
+{"detail":"Missing or invalid Bearer token in Authorization header.","instance":"/orders","status":401,"title":"Unauthorized","type":"https://campuseats.internal/errors/unauthorized"}
+
+
+================================================================================
+# D2. FAILURE 2: Malformed JSON syntax -> 400 Bad Request with Problem Details (invalid-json)
+# Command: curl.exe -i -X POST http://127.0.0.1:5066/orders -H Authorization: Bearer test-jwt-token -H Content-Type: application/json -d {"customer_id": "c0d3c259-0aac-4c19-acef-bbb7cbd9d9d3", invalid_json
+================================================================================
+HTTP/1.1 400 BAD REQUEST
+Server: Werkzeug/3.1.8 Python/3.13.5
+Date: Sun, 11 Oct 2026 08:52:11 GMT
+Content-Type: application/problem+json; charset=utf-8
+Content-Length: 154
+X-Content-Type-Options: nosniff
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+Server: CampusEats-OrdersService/2.0
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS, HEAD
+Access-Control-Allow-Headers: Authorization, Content-Type, Accept, If-None-Match, If-Match, Idempotency-Key, X-HTTP-Method-Override, X-Simulate-Outage
+Access-Control-Expose-Headers: Location, ETag, X-RateLimit-Limit, X-RateLimit-Remaining, Retry-After
+X-RateLimit-Limit: 60
+X-RateLimit-Remaining: 58
+Connection: close
+
+{"detail":"Malformed JSON body syntax.","instance":"/orders","status":400,"title":"Bad Request","type":"https://campuseats.internal/errors/invalid-json"}
+
+
+================================================================================
+# D2. FAILURE 3: Empty Cart -> 422 Unprocessable Entity with stable type 'empty-cart' (Requirement B2, C1)
+# Command: curl.exe -i -X POST http://127.0.0.1:5066/orders -H Authorization: Bearer test-jwt-token -H Content-Type: application/json -d {"customer_id": "c0d3c259-0aac-4c19-acef-bbb7cbd9d9d3", "canteen_id": "b38ad05b-816e-4e22-b7c9-2b83c64fb9cb", "address": "Hostel 4, Room 201, South Campus", "items": []}
+================================================================================
+HTTP/1.1 422 UNPROCESSABLE ENTITY
+Server: Werkzeug/3.1.8 Python/3.13.5
+Date: Sun, 11 Oct 2026 08:52:11 GMT
+Content-Type: application/problem+json; charset=utf-8
+Content-Length: 311
+X-Content-Type-Options: nosniff
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+Server: CampusEats-OrdersService/2.0
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS, HEAD
+Access-Control-Allow-Headers: Authorization, Content-Type, Accept, If-None-Match, If-Match, Idempotency-Key, X-HTTP-Method-Override, X-Simulate-Outage
+Access-Control-Expose-Headers: Location, ETag, X-RateLimit-Limit, X-RateLimit-Remaining, Retry-After
+X-RateLimit-Limit: 60
+X-RateLimit-Remaining: 57
+Connection: close
+
+{"detail":"Request body failed validation checks. See 'errors' for field-level details.","errors":[{"field":"items","message":"Cart cannot be empty; items must contain at least one item."}],"instance":"/orders","status":422,"title":"Unprocessable Entity","type":"https://campuseats.internal/errors/empty-cart"}
+
+
+================================================================================
+# D2. FAILURE 4: Field-level multi-error validation -> 422 with errors[] list naming quantity <= 0 and empty address (Requirement B3, C2)
+# Command: curl.exe -i -X POST http://127.0.0.1:5066/orders -H Authorization: Bearer test-jwt-token -H Content-Type: application/json -d {"customer_id": "c0d3c259-0aac-4c19-acef-bbb7cbd9d9d3", "canteen_id": "b38ad05b-816e-4e22-b7c9-2b83c64fb9cb", "address": "", "items": [{"menu_item_id": "1e84ceb4-e952-47f6-b0f1-136805a9f5a6", "item_name": "Chole Bhature", "quantity": 0, "unit_price": 90.0}]}
+================================================================================
+HTTP/1.1 422 UNPROCESSABLE ENTITY
+Server: Werkzeug/3.1.8 Python/3.13.5
+Date: Sun, 11 Oct 2026 08:52:11 GMT
+Content-Type: application/problem+json; charset=utf-8
+Content-Length: 388
+X-Content-Type-Options: nosniff
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+Server: CampusEats-OrdersService/2.0
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS, HEAD
+Access-Control-Allow-Headers: Authorization, Content-Type, Accept, If-None-Match, If-Match, Idempotency-Key, X-HTTP-Method-Override, X-Simulate-Outage
+Access-Control-Expose-Headers: Location, ETag, X-RateLimit-Limit, X-RateLimit-Remaining, Retry-After
+X-RateLimit-Limit: 60
+X-RateLimit-Remaining: 56
+Connection: close
+
+{"detail":"Request body failed validation checks. See 'errors' for field-level details.","errors":[{"field":"address","message":"Delivery address cannot be empty or whitespace only."},{"field":"items[0].quantity","message":"Quantity must be an integer >= 1."}],"instance":"/orders","status":422,"title":"Unprocessable Entity","type":"https://campuseats.internal/errors/validation-error"}
+
+
+================================================================================
+# D2. FAILURE 5: Item Unavailable -> 422 Unprocessable Entity with stable type 'item-unavailable' (Requirement B2)
+# Command: curl.exe -i -X POST http://127.0.0.1:5066/orders -H Authorization: Bearer test-jwt-token -H Content-Type: application/json -d {"customer_id": "c0d3c259-0aac-4c19-acef-bbb7cbd9d9d3", "canteen_id": "b38ad05b-816e-4e22-b7c9-2b83c64fb9cb", "address": "Hostel 4, Room 201, South Campus", "items": [{"menu_item_id": "1e84ceb4-e952-47f6-b0f1-136805a9f5a6", "item_name": "Cold Coffee Special (Out of Stock)", "quantity": 1, "unit_price": 60.0}]}
+================================================================================
+HTTP/1.1 422 UNPROCESSABLE ENTITY
+Server: Werkzeug/3.1.8 Python/3.13.5
+Date: Sun, 11 Oct 2026 08:52:11 GMT
+Content-Type: application/problem+json; charset=utf-8
+Content-Length: 235
+X-Content-Type-Options: nosniff
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+Server: CampusEats-OrdersService/2.0
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS, HEAD
+Access-Control-Allow-Headers: Authorization, Content-Type, Accept, If-None-Match, If-Match, Idempotency-Key, X-HTTP-Method-Override, X-Simulate-Outage
+Access-Control-Expose-Headers: Location, ETag, X-RateLimit-Limit, X-RateLimit-Remaining, Retry-After
+X-RateLimit-Limit: 60
+X-RateLimit-Remaining: 55
+Connection: close
+
+{"detail":"Item 'Cold Coffee Special (Out of Stock)' is currently unavailable or out of stock at this canteen.","instance":"/orders","status":422,"title":"Item Unavailable","type":"https://campuseats.internal/errors/item-unavailable"}
+
+
+================================================================================
+# D2. FAILURE 6: Payment Declined -> 422 Unprocessable Entity with stable type 'payment-declined' (Requirement B2)
+# Command: curl.exe -i -X POST http://127.0.0.1:5066/orders -H Authorization: Bearer test-jwt-token -H Content-Type: application/json -d {"customer_id": "c0d3c259-0aac-4c19-acef-bbb7cbd9d9d3", "canteen_id": "b38ad05b-816e-4e22-b7c9-2b83c64fb9cb", "address": "Hostel 4, Room 201, South Campus", "payment_token": "tok_fail_card_declined", "items": [{"menu_item_id": "1e84ceb4-e952-47f6-b0f1-136805a9f5a6", "item_name": "Veg Thali", "quantity": 1, "unit_price": 110.0}]}
+================================================================================
+HTTP/1.1 422 UNPROCESSABLE ENTITY
+Server: Werkzeug/3.1.8 Python/3.13.5
+Date: Sun, 11 Oct 2026 08:52:11 GMT
+Content-Type: application/problem+json; charset=utf-8
+Content-Length: 183
+X-Content-Type-Options: nosniff
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+Server: CampusEats-OrdersService/2.0
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS, HEAD
+Access-Control-Allow-Headers: Authorization, Content-Type, Accept, If-None-Match, If-Match, Idempotency-Key, X-HTTP-Method-Override, X-Simulate-Outage
+Access-Control-Expose-Headers: Location, ETag, X-RateLimit-Limit, X-RateLimit-Remaining, Retry-After
+X-RateLimit-Limit: 60
+X-RateLimit-Remaining: 54
+Connection: close
+
+{"detail":"Payment declined: insufficient account balance.","instance":"/orders","status":422,"title":"Payment Declined","type":"https://campuseats.internal/errors/payment-declined"}
+
+
+================================================================================
+# D2. FAILURE 7: Unknown Resource ID -> 404 Not Found with stable type 'order-not-found' (Requirement B2)
+# Command: curl.exe -i -X GET http://127.0.0.1:5066/orders/6ba642a1-a520-4228-b2eb-aea74518a413
+================================================================================
+HTTP/1.1 404 NOT FOUND
+Server: Werkzeug/3.1.8 Python/3.13.5
+Date: Sun, 11 Oct 2026 08:52:11 GMT
+Content-Type: application/problem+json; charset=utf-8
+Content-Length: 247
+X-Content-Type-Options: nosniff
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+Server: CampusEats-OrdersService/2.0
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS, HEAD
+Access-Control-Allow-Headers: Authorization, Content-Type, Accept, If-None-Match, If-Match, Idempotency-Key, X-HTTP-Method-Override, X-Simulate-Outage
+Access-Control-Expose-Headers: Location, ETag, X-RateLimit-Limit, X-RateLimit-Remaining, Retry-After
+X-RateLimit-Limit: 60
+X-RateLimit-Remaining: 58
+Connection: close
+
+{"detail":"Order with ID '6ba642a1-a520-4228-b2eb-aea74518a413' was not found in our records.","instance":"/orders/6ba642a1-a520-4228-b2eb-aea74518a413","status":404,"title":"Not Found","type":"https://campuseats.internal/errors/order-not-found"}
+
+
+================================================================================
+# D2. SETUP: Cancel order1 -> 200 OK (Transitioning to cancelled state)
+# Command: curl.exe -i -X POST http://127.0.0.1:5066/orders/94f1161f-aa8e-4b0f-95bb-5d302770c9e0/cancel -H Authorization: Bearer test-jwt-token -H Content-Type: application/json -d {"reason": "Changed my mind about the delivery location"}
+================================================================================
+HTTP/1.1 200 OK
+Server: Werkzeug/3.1.8 Python/3.13.5
+Date: Sun, 11 Oct 2026 08:52:11 GMT
+Content-Type: application/json; charset=utf-8
+Content-Length: 709
+ETag: "bb03598328c11700c6efcd9baa61f75b"
+X-Content-Type-Options: nosniff
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+Server: CampusEats-OrdersService/2.0
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS, HEAD
+Access-Control-Allow-Headers: Authorization, Content-Type, Accept, If-None-Match, If-Match, Idempotency-Key, X-HTTP-Method-Override, X-Simulate-Outage
+Access-Control-Expose-Headers: Location, ETag, X-RateLimit-Limit, X-RateLimit-Remaining, Retry-After
+X-RateLimit-Limit: 60
+X-RateLimit-Remaining: 53
+Connection: close
+
+{"address":"Hostel 4, Room 201, South Campus","cancellation_reason":"Changed my mind about the delivery location","cancelled_at":"2026-10-11T08:52:11.555562+00:00","canteen_id":"b38ad05b-816e-4e22-b7c9-2b83c64fb9cb","custom_notes":"Extra mint chutney please","customer_id":"c0d3c259-0aac-4c19-acef-bbb7cbd9d9d3","delivery_fee":25.0,"id":"94f1161f-aa8e-4b0f-95bb-5d302770c9e0","items":[{"item_name":"Paneer Butter Masala Roll","menu_item_id":"1e84ceb4-e952-47f6-b0f1-136805a9f5a6","quantity":2,"unit_price":95.0}],"ordered_at":"2026-10-11T08:52:11.272105+00:00","service_fee":15.0,"status":"cancelled","subtotal":190.0,"tax":9.5,"total_price":239.5,"updated_at":"2026-10-11T08:52:11.555562+00:00","version":2}
+
+
+================================================================================
+# D2. FAILURE 8: Illegal Transition -> 409 Conflict with stable type 'illegal-transition' (Requirement B2)
+# Command: curl.exe -i -X POST http://127.0.0.1:5066/orders/94f1161f-aa8e-4b0f-95bb-5d302770c9e0/cancel -H Authorization: Bearer test-jwt-token -H Content-Type: application/json -d {"reason": "Second cancellation attempt"}
+================================================================================
+HTTP/1.1 409 CONFLICT
+Server: Werkzeug/3.1.8 Python/3.13.5
+Date: Sun, 11 Oct 2026 08:52:11 GMT
+Content-Type: application/problem+json; charset=utf-8
+Content-Length: 207
+X-Content-Type-Options: nosniff
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+Server: CampusEats-OrdersService/2.0
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS, HEAD
+Access-Control-Allow-Headers: Authorization, Content-Type, Accept, If-None-Match, If-Match, Idempotency-Key, X-HTTP-Method-Override, X-Simulate-Outage
+Access-Control-Expose-Headers: Location, ETag, X-RateLimit-Limit, X-RateLimit-Remaining, Retry-After
+X-RateLimit-Limit: 60
+X-RateLimit-Remaining: 52
+Connection: close
+
+{"detail":"Order is already cancelled.","instance":"/orders/94f1161f-aa8e-4b0f-95bb-5d302770c9e0/cancel","status":409,"title":"State Conflict","type":"https://campuseats.internal/errors/illegal-transition"}
+
+
+================================================================================
+# D2. FAILURE 9: Rate Limit Exceeded -> 429 Too Many Requests with Retry-After header (Requirement A4, B2)
+# Command: curl.exe -i -X GET http://127.0.0.1:5066/orders -H Authorization: Bearer rate-limit-test-client
+================================================================================
+HTTP/1.1 429 TOO MANY REQUESTS
+Server: Werkzeug/3.1.8 Python/3.13.5
+Date: Sun, 11 Oct 2026 08:52:12 GMT
+Content-Type: application/problem+json; charset=utf-8
+Content-Length: 191
+Retry-After: 58
+X-Content-Type-Options: nosniff
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+Server: CampusEats-OrdersService/2.0
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS, HEAD
+Access-Control-Allow-Headers: Authorization, Content-Type, Accept, If-None-Match, If-Match, Idempotency-Key, X-HTTP-Method-Override, X-Simulate-Outage
+Access-Control-Expose-Headers: Location, ETag, X-RateLimit-Limit, X-RateLimit-Remaining, Retry-After
+X-RateLimit-Limit: 60
+X-RateLimit-Remaining: 0
+Connection: close
+
+{"detail":"Rate limit exceeded. Please retry after 58 seconds.","instance":"/orders","status":429,"title":"Too Many Requests","type":"https://campuseats.internal/errors/rate-limit-exceeded"}
+
+
+================================================================================
+# D2. FAILURE 10: Service Outage / Maintenance -> 503 Service Unavailable with Retry-After: 60 header (Requirement A4, B2)
+# Command: curl.exe -i -X GET http://127.0.0.1:5066/orders -H Authorization: Bearer test-jwt-token -H X-Simulate-Outage: 1
+================================================================================
+HTTP/1.1 503 SERVICE UNAVAILABLE
+Server: Werkzeug/3.1.8 Python/3.13.5
+Date: Sun, 11 Oct 2026 08:52:12 GMT
+Content-Type: application/problem+json; charset=utf-8
+Content-Length: 230
+Retry-After: 60
+X-Content-Type-Options: nosniff
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+Server: CampusEats-OrdersService/2.0
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS, HEAD
+Access-Control-Allow-Headers: Authorization, Content-Type, Accept, If-None-Match, If-Match, Idempotency-Key, X-HTTP-Method-Override, X-Simulate-Outage
+Access-Control-Expose-Headers: Location, ETag, X-RateLimit-Limit, X-RateLimit-Remaining, Retry-After
+Connection: close
+
+{"detail":"The CampusEats Orders Service is undergoing scheduled maintenance. Please retry shortly.","instance":"/orders","status":503,"title":"Service Unavailable","type":"https://campuseats.internal/errors/service-unavailable"}
+
+
+================================================================================
+# D3. SETUP: Create second order for Content Negotiation tests
+# Command: curl.exe -i -X POST http://127.0.0.1:5066/orders -H Authorization: Bearer test-jwt-token -H Content-Type: application/json -d {"customer_id": "d1e2f3a4-b5c6-47d8-9e0f-1a2b3c4d5e6f", "canteen_id": "b38ad05b-816e-4e22-b7c9-2b83c64fb9cb", "address": "Faculty Residence Block B, Flat 104", "items": [{"menu_item_id": "2f95dfc5-f063-4807-c102-247916b0a6b7", "item_name": "Masala Dosa with Sambar", "quantity": 1, "unit_price": 80.0}]}
+================================================================================
+HTTP/1.1 201 CREATED
+Server: Werkzeug/3.1.8 Python/3.13.5
+Date: Sun, 11 Oct 2026 08:52:12 GMT
+Content-Type: application/json; charset=utf-8
+Content-Length: 592
+Location: /orders/99b6a144-24aa-40c2-b268-6f04dcd3bbc2
+ETag: "842b4a673af3d195e28942e026dfac23"
+X-Content-Type-Options: nosniff
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+Server: CampusEats-OrdersService/2.0
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS, HEAD
+Access-Control-Allow-Headers: Authorization, Content-Type, Accept, If-None-Match, If-Match, Idempotency-Key, X-HTTP-Method-Override, X-Simulate-Outage
+Access-Control-Expose-Headers: Location, ETag, X-RateLimit-Limit, X-RateLimit-Remaining, Retry-After
+X-RateLimit-Limit: 60
+X-RateLimit-Remaining: 51
+Connection: close
+
+{"address":"Faculty Residence Block B, Flat 104","cancellation_reason":null,"cancelled_at":null,"canteen_id":"b38ad05b-816e-4e22-b7c9-2b83c64fb9cb","customer_id":"d1e2f3a4-b5c6-47d8-9e0f-1a2b3c4d5e6f","delivery_fee":30.0,"id":"99b6a144-24aa-40c2-b268-6f04dcd3bbc2","items":[{"item_name":"Masala Dosa with Sambar","menu_item_id":"2f95dfc5-f063-4807-c102-247916b0a6b7","quantity":1,"unit_price":80.0}],"ordered_at":"2026-10-11T08:52:12.760793+00:00","service_fee":15.0,"status":"placed","subtotal":80.0,"tax":4.0,"total_price":129.0,"updated_at":"2026-10-11T08:52:12.760793+00:00","version":1}
+
+
+================================================================================
+# D3. CONTENT NEGOTIATION 1: Accept: application/xml -> 200 OK with Content-Type: application/xml; charset=utf-8 (Requirement C3, C4)
+# Command: curl.exe -i -X GET http://127.0.0.1:5066/orders/99b6a144-24aa-40c2-b268-6f04dcd3bbc2 -H Accept: application/xml
+================================================================================
+HTTP/1.1 200 OK
+Server: Werkzeug/3.1.8 Python/3.13.5
+Date: Sun, 11 Oct 2026 08:52:12 GMT
+Content-Type: application/xml; charset=utf-8
+Content-Length: 765
+ETag: "842b4a673af3d195e28942e026dfac23"
+Cache-Control: private, max-age=60, must-revalidate
+X-Content-Type-Options: nosniff
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+Server: CampusEats-OrdersService/2.0
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS, HEAD
+Access-Control-Allow-Headers: Authorization, Content-Type, Accept, If-None-Match, If-Match, Idempotency-Key, X-HTTP-Method-Override, X-Simulate-Outage
+Access-Control-Expose-Headers: Location, ETag, X-RateLimit-Limit, X-RateLimit-Remaining, Retry-After
+X-RateLimit-Limit: 60
+X-RateLimit-Remaining: 57
+Connection: close
+
+<?xml version='1.0' encoding='utf-8'?>
+<order><id>99b6a144-24aa-40c2-b268-6f04dcd3bbc2</id><customer_id>d1e2f3a4-b5c6-47d8-9e0f-1a2b3c4d5e6f</customer_id><canteen_id>b38ad05b-816e-4e22-b7c9-2b83c64fb9cb</canteen_id><address>Faculty Residence Block B, Flat 104</address><status>placed</status><subtotal>80.00</subtotal><service_fee>15.00</service_fee><delivery_fee>30.00</delivery_fee><tax>4.00</tax><total_price>129.00</total_price><version>1</version><ordered_at>2026-10-11T08:52:12.760793+00:00</ordered_at><updated_at>2026-10-11T08:52:12.760793+00:00</updated_at><items><item><menu_item_id>2f95dfc5-f063-4807-c102-247916b0a6b7</menu_item_id><item_name>Masala Dosa with Sambar</item_name><quantity>1</quantity><unit_price>80.00</unit_price></item></items></order>
+
+
+================================================================================
+# D3. CONTENT NEGOTIATION 2: Accept: application/json -> 200 OK with Content-Type: application/json; charset=utf-8 (Requirement C3, C4)
+# Command: curl.exe -i -X GET http://127.0.0.1:5066/orders/99b6a144-24aa-40c2-b268-6f04dcd3bbc2 -H Accept: application/json
+================================================================================
+HTTP/1.1 200 OK
+Server: Werkzeug/3.1.8 Python/3.13.5
+Date: Sun, 11 Oct 2026 08:52:12 GMT
+Content-Type: application/json; charset=utf-8
+Content-Length: 592
+ETag: "842b4a673af3d195e28942e026dfac23"
+Cache-Control: private, max-age=60, must-revalidate
+X-Content-Type-Options: nosniff
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+Server: CampusEats-OrdersService/2.0
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS, HEAD
+Access-Control-Allow-Headers: Authorization, Content-Type, Accept, If-None-Match, If-Match, Idempotency-Key, X-HTTP-Method-Override, X-Simulate-Outage
+Access-Control-Expose-Headers: Location, ETag, X-RateLimit-Limit, X-RateLimit-Remaining, Retry-After
+X-RateLimit-Limit: 60
+X-RateLimit-Remaining: 56
+Connection: close
+
+{"address":"Faculty Residence Block B, Flat 104","cancellation_reason":null,"cancelled_at":null,"canteen_id":"b38ad05b-816e-4e22-b7c9-2b83c64fb9cb","customer_id":"d1e2f3a4-b5c6-47d8-9e0f-1a2b3c4d5e6f","delivery_fee":30.0,"id":"99b6a144-24aa-40c2-b268-6f04dcd3bbc2","items":[{"item_name":"Masala Dosa with Sambar","menu_item_id":"2f95dfc5-f063-4807-c102-247916b0a6b7","quantity":1,"unit_price":80.0}],"ordered_at":"2026-10-11T08:52:12.760793+00:00","service_fee":15.0,"status":"placed","subtotal":80.0,"tax":4.0,"total_price":129.0,"updated_at":"2026-10-11T08:52:12.760793+00:00","version":1}
+
+
+================================================================================
+# D3. CONTENT NEGOTIATION 3: Accept: text/csv -> 406 Not Acceptable with Problem Details (Requirement C3)
+# Command: curl.exe -i -X GET http://127.0.0.1:5066/orders/99b6a144-24aa-40c2-b268-6f04dcd3bbc2 -H Accept: text/csv
+================================================================================
+HTTP/1.1 406 NOT ACCEPTABLE
+Server: Werkzeug/3.1.8 Python/3.13.5
+Date: Sun, 11 Oct 2026 08:52:12 GMT
+Content-Type: application/problem+json; charset=utf-8
+Content-Length: 226
+X-Content-Type-Options: nosniff
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+Server: CampusEats-OrdersService/2.0
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS, HEAD
+Access-Control-Allow-Headers: Authorization, Content-Type, Accept, If-None-Match, If-Match, Idempotency-Key, X-HTTP-Method-Override, X-Simulate-Outage
+Access-Control-Expose-Headers: Location, ETag, X-RateLimit-Limit, X-RateLimit-Remaining, Retry-After
+X-RateLimit-Limit: 60
+X-RateLimit-Remaining: 55
+Connection: close
+
+{"detail":"Supported media types: application/json, application/xml.","instance":"/orders/99b6a144-24aa-40c2-b268-6f04dcd3bbc2","status":406,"title":"Not Acceptable","type":"https://campuseats.internal/errors/not-acceptable"}
+
+
+================================================================================
+# D4. REGRESSION 1 (First Call): POST /orders with Idempotency-Key -> 201 Created (Requirement D4)
+# Command: curl.exe -i -X POST http://127.0.0.1:5066/orders -H Authorization: Bearer test-jwt-token -H Idempotency-Key: idem-key-5ae2badfb5ec -H Content-Type: application/json -d {"customer_id": "c0d3c259-0aac-4c19-acef-bbb7cbd9d9d3", "canteen_id": "b38ad05b-816e-4e22-b7c9-2b83c64fb9cb", "address": "Hostel 4, Room 201, South Campus", "items": [{"menu_item_id": "1e84ceb4-e952-47f6-b0f1-136805a9f5a6", "item_name": "Paneer Butter Masala Roll", "quantity": 2, "unit_price": 95.0}], "delivery_fee": 25.0, "custom_notes": "Extra mint chutney please"}
+================================================================================
+HTTP/1.1 201 CREATED
+Server: Werkzeug/3.1.8 Python/3.13.5
+Date: Sun, 11 Oct 2026 08:52:12 GMT
+Content-Type: application/json; charset=utf-8
+Content-Length: 635
+Location: /orders/f1003eef-8814-4b2b-b4cd-f2b4f61f3ae4
+ETag: "431b162cbff54b76b838f1e50fac4c31"
+X-Content-Type-Options: nosniff
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+Server: CampusEats-OrdersService/2.0
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS, HEAD
+Access-Control-Allow-Headers: Authorization, Content-Type, Accept, If-None-Match, If-Match, Idempotency-Key, X-HTTP-Method-Override, X-Simulate-Outage
+Access-Control-Expose-Headers: Location, ETag, X-RateLimit-Limit, X-RateLimit-Remaining, Retry-After
+X-RateLimit-Limit: 60
+X-RateLimit-Remaining: 50
+Connection: close
+
+{"address":"Hostel 4, Room 201, South Campus","cancellation_reason":null,"cancelled_at":null,"canteen_id":"b38ad05b-816e-4e22-b7c9-2b83c64fb9cb","custom_notes":"Extra mint chutney please","customer_id":"c0d3c259-0aac-4c19-acef-bbb7cbd9d9d3","delivery_fee":25.0,"id":"f1003eef-8814-4b2b-b4cd-f2b4f61f3ae4","items":[{"item_name":"Paneer Butter Masala Roll","menu_item_id":"1e84ceb4-e952-47f6-b0f1-136805a9f5a6","quantity":2,"unit_price":95.0}],"ordered_at":"2026-10-11T08:52:12.878716+00:00","service_fee":15.0,"status":"placed","subtotal":190.0,"tax":9.5,"total_price":239.5,"updated_at":"2026-10-11T08:52:12.878716+00:00","version":1}
+
+
+================================================================================
+# D4. REGRESSION 1 (Replay Call): POST /orders with identical Idempotency-Key -> 201 Created with X-Cache-Lookup: HIT-IDEMPOTENT (Requirement D4)
+# Command: curl.exe -i -X POST http://127.0.0.1:5066/orders -H Authorization: Bearer test-jwt-token -H Idempotency-Key: idem-key-5ae2badfb5ec -H Content-Type: application/json -d {"customer_id": "c0d3c259-0aac-4c19-acef-bbb7cbd9d9d3", "canteen_id": "b38ad05b-816e-4e22-b7c9-2b83c64fb9cb", "address": "Hostel 4, Room 201, South Campus", "items": [{"menu_item_id": "1e84ceb4-e952-47f6-b0f1-136805a9f5a6", "item_name": "Paneer Butter Masala Roll", "quantity": 2, "unit_price": 95.0}], "delivery_fee": 25.0, "custom_notes": "Extra mint chutney please"}
+================================================================================
+HTTP/1.1 201 CREATED
+Server: Werkzeug/3.1.8 Python/3.13.5
+Date: Sun, 11 Oct 2026 08:52:12 GMT
+Content-Type: application/json; charset=utf-8
+Content-Length: 635
+Location: /orders/f1003eef-8814-4b2b-b4cd-f2b4f61f3ae4
+ETag: "431b162cbff54b76b838f1e50fac4c31"
+X-Cache-Lookup: HIT-IDEMPOTENT
+X-Content-Type-Options: nosniff
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+Server: CampusEats-OrdersService/2.0
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS, HEAD
+Access-Control-Allow-Headers: Authorization, Content-Type, Accept, If-None-Match, If-Match, Idempotency-Key, X-HTTP-Method-Override, X-Simulate-Outage
+Access-Control-Expose-Headers: Location, ETag, X-RateLimit-Limit, X-RateLimit-Remaining, Retry-After
+X-RateLimit-Limit: 60
+X-RateLimit-Remaining: 49
+Connection: close
+
+{"address":"Hostel 4, Room 201, South Campus","cancellation_reason":null,"cancelled_at":null,"canteen_id":"b38ad05b-816e-4e22-b7c9-2b83c64fb9cb","custom_notes":"Extra mint chutney please","customer_id":"c0d3c259-0aac-4c19-acef-bbb7cbd9d9d3","delivery_fee":25.0,"id":"f1003eef-8814-4b2b-b4cd-f2b4f61f3ae4","items":[{"item_name":"Paneer Butter Masala Roll","menu_item_id":"1e84ceb4-e952-47f6-b0f1-136805a9f5a6","quantity":2,"unit_price":95.0}],"ordered_at":"2026-10-11T08:52:12.878716+00:00","service_fee":15.0,"status":"placed","subtotal":190.0,"tax":9.5,"total_price":239.5,"updated_at":"2026-10-11T08:52:12.878716+00:00","version":1}
+
+
+================================================================================
+# D4. REGRESSION 2: Conditional GET with If-None-Match -> 304 Not Modified with empty body (Requirement D4)
+# Command: curl.exe -i -X GET http://127.0.0.1:5066/orders/99b6a144-24aa-40c2-b268-6f04dcd3bbc2 -H If-None-Match: "842b4a673af3d195e28942e026dfac23"
+================================================================================
+HTTP/1.1 304 NOT MODIFIED
+Server: Werkzeug/3.1.8 Python/3.13.5
+Date: Sun, 11 Oct 2026 08:52:12 GMT
+ETag: "842b4a673af3d195e28942e026dfac23"
+Cache-Control: private, max-age=60, must-revalidate
+X-Content-Type-Options: nosniff
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+Server: CampusEats-OrdersService/2.0
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS, HEAD
+Access-Control-Allow-Headers: Authorization, Content-Type, Accept, If-None-Match, If-Match, Idempotency-Key, X-HTTP-Method-Override, X-Simulate-Outage
+Access-Control-Expose-Headers: Location, ETag, X-RateLimit-Limit, X-RateLimit-Remaining, Retry-After
+X-RateLimit-Limit: 60
+X-RateLimit-Remaining: 54
+Connection: close
+
+
+================================================================================
+# D4. REGRESSION 3: Conditional PUT with invalid If-Match -> 412 Precondition Failed (Requirement D4)
+# Command: curl.exe -i -X PUT http://127.0.0.1:5066/orders/99b6a144-24aa-40c2-b268-6f04dcd3bbc2 -H Authorization: Bearer test-jwt-token -H If-Match: "mismatched-etag-12345" -H Content-Type: application/json -d {"address": "Faculty Residence Block B, Flat 204"}
+================================================================================
+HTTP/1.1 412 PRECONDITION FAILED
+Server: Werkzeug/3.1.8 Python/3.13.5
+Date: Sun, 11 Oct 2026 08:52:12 GMT
+Content-Type: application/problem+json; charset=utf-8
+Content-Length: 253
+X-Content-Type-Options: nosniff
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+Server: CampusEats-OrdersService/2.0
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS, HEAD
+Access-Control-Allow-Headers: Authorization, Content-Type, Accept, If-None-Match, If-Match, Idempotency-Key, X-HTTP-Method-Override, X-Simulate-Outage
+Access-Control-Expose-Headers: Location, ETag, X-RateLimit-Limit, X-RateLimit-Remaining, Retry-After
+X-RateLimit-Limit: 60
+X-RateLimit-Remaining: 48
+Connection: close
+
+{"detail":"If-Match header is mandatory for PUT and must match current resource ETag.","instance":"/orders/99b6a144-24aa-40c2-b268-6f04dcd3bbc2","status":412,"title":"Precondition Failed","type":"https://campuseats.internal/errors/precondition-failed"}
+
+
+================================================================================
+# D4. REGRESSION 4: Partial update via PATCH /orders/{id} -> 200 OK with updated entity (Requirement A1)
+# Command: curl.exe -i -X PATCH http://127.0.0.1:5066/orders/99b6a144-24aa-40c2-b268-6f04dcd3bbc2 -H Authorization: Bearer test-jwt-token -H Content-Type: application/json -d {"custom_notes": "Ring doorbell twice upon arrival"}
+================================================================================
+HTTP/1.1 200 OK
+Server: Werkzeug/3.1.8 Python/3.13.5
+Date: Sun, 11 Oct 2026 08:52:13 GMT
+Content-Type: application/json; charset=utf-8
+Content-Length: 642
+ETag: "330e7f94f11e6057c6eca891d1ce8176"
+X-Content-Type-Options: nosniff
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+Server: CampusEats-OrdersService/2.0
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS, HEAD
+Access-Control-Allow-Headers: Authorization, Content-Type, Accept, If-None-Match, If-Match, Idempotency-Key, X-HTTP-Method-Override, X-Simulate-Outage
+Access-Control-Expose-Headers: Location, ETag, X-RateLimit-Limit, X-RateLimit-Remaining, Retry-After
+X-RateLimit-Limit: 60
+X-RateLimit-Remaining: 47
+Connection: close
+
+{"address":"Faculty Residence Block B, Flat 104","cancellation_reason":null,"cancelled_at":null,"canteen_id":"b38ad05b-816e-4e22-b7c9-2b83c64fb9cb","custom_notes":"Ring doorbell twice upon arrival","customer_id":"d1e2f3a4-b5c6-47d8-9e0f-1a2b3c4d5e6f","delivery_fee":30.0,"id":"99b6a144-24aa-40c2-b268-6f04dcd3bbc2","items":[{"item_name":"Masala Dosa with Sambar","menu_item_id":"2f95dfc5-f063-4807-c102-247916b0a6b7","quantity":1,"unit_price":80.0}],"ordered_at":"2026-10-11T08:52:12.760793+00:00","service_fee":15.0,"status":"placed","subtotal":80.0,"tax":4.0,"total_price":129.0,"updated_at":"2026-10-11T08:52:13.003874+00:00","version":2}
+
+
+================================================================================
+# D4. REGRESSION 5: DELETE /orders/{id} -> 204 No Content (Requirement A1, D4)
+# Command: curl.exe -i -X DELETE http://127.0.0.1:5066/orders/99b6a144-24aa-40c2-b268-6f04dcd3bbc2 -H Authorization: Bearer test-jwt-token
+================================================================================
+HTTP/1.1 204 NO CONTENT
+Server: Werkzeug/3.1.8 Python/3.13.5
+Date: Sun, 11 Oct 2026 08:52:13 GMT
+Content-Type: text/html; charset=utf-8
+X-Content-Type-Options: nosniff
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+Server: CampusEats-OrdersService/2.0
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS, HEAD
+Access-Control-Allow-Headers: Authorization, Content-Type, Accept, If-None-Match, If-Match, Idempotency-Key, X-HTTP-Method-Override, X-Simulate-Outage
+Access-Control-Expose-Headers: Location, ETag, X-RateLimit-Limit, X-RateLimit-Remaining, Retry-After
+X-RateLimit-Limit: 60
+X-RateLimit-Remaining: 46
+Connection: close
+
+
+================================================================================
+# D4. REGRESSION 5 VERIFY: GET /orders/{id} after deletion -> 404 Not Found (Requirement D4)
+# Command: curl.exe -i -X GET http://127.0.0.1:5066/orders/99b6a144-24aa-40c2-b268-6f04dcd3bbc2
+================================================================================
+HTTP/1.1 404 NOT FOUND
+Server: Werkzeug/3.1.8 Python/3.13.5
+Date: Sun, 11 Oct 2026 08:52:13 GMT
+Content-Type: application/problem+json; charset=utf-8
+Content-Length: 247
+X-Content-Type-Options: nosniff
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+Server: CampusEats-OrdersService/2.0
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS, HEAD
+Access-Control-Allow-Headers: Authorization, Content-Type, Accept, If-None-Match, If-Match, Idempotency-Key, X-HTTP-Method-Override, X-Simulate-Outage
+Access-Control-Expose-Headers: Location, ETag, X-RateLimit-Limit, X-RateLimit-Remaining, Retry-After
+X-RateLimit-Limit: 60
+X-RateLimit-Remaining: 53
+Connection: close
+
+{"detail":"Order with ID '99b6a144-24aa-40c2-b268-6f04dcd3bbc2' was not found in our records.","instance":"/orders/99b6a144-24aa-40c2-b268-6f04dcd3bbc2","status":404,"title":"Not Found","type":"https://campuseats.internal/errors/order-not-found"}
+
+
+================================================================================
+# D4. REGRESSION 6: OPTIONS /orders -> 204 No Content with Allow: GET, POST, OPTIONS, HEAD
+# Command: curl.exe -i -X OPTIONS http://127.0.0.1:5066/orders
+================================================================================
+HTTP/1.1 204 NO CONTENT
+Server: Werkzeug/3.1.8 Python/3.13.5
+Date: Sun, 11 Oct 2026 08:52:13 GMT
+Content-Type: text/html; charset=utf-8
+Allow: GET, POST, OPTIONS, HEAD
+X-Content-Type-Options: nosniff
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+Server: CampusEats-OrdersService/2.0
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS, HEAD
+Access-Control-Allow-Headers: Authorization, Content-Type, Accept, If-None-Match, If-Match, Idempotency-Key, X-HTTP-Method-Override, X-Simulate-Outage
+Access-Control-Expose-Headers: Location, ETag, X-RateLimit-Limit, X-RateLimit-Remaining, Retry-After
+X-RateLimit-Limit: 60
+X-RateLimit-Remaining: 52
+Connection: close
+
+
+================================================================================
+# D4. REGRESSION 7: OPTIONS /orders/{id} -> 204 No Content with Allow: GET, PUT, PATCH, DELETE, OPTIONS, HEAD
+# Command: curl.exe -i -X OPTIONS http://127.0.0.1:5066/orders/94f1161f-aa8e-4b0f-95bb-5d302770c9e0
+================================================================================
+HTTP/1.1 204 NO CONTENT
+Server: Werkzeug/3.1.8 Python/3.13.5
+Date: Sun, 11 Oct 2026 08:52:13 GMT
+Content-Type: text/html; charset=utf-8
+Allow: GET, PUT, PATCH, DELETE, OPTIONS, HEAD
+X-Content-Type-Options: nosniff
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+Server: CampusEats-OrdersService/2.0
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS, HEAD
+Access-Control-Allow-Headers: Authorization, Content-Type, Accept, If-None-Match, If-Match, Idempotency-Key, X-HTTP-Method-Override, X-Simulate-Outage
+Access-Control-Expose-Headers: Location, ETag, X-RateLimit-Limit, X-RateLimit-Remaining, Retry-After
+X-RateLimit-Limit: 60
+X-RateLimit-Remaining: 51
+Connection: close
+
+
+================================================================================
+# D4. REGRESSION 8: GET /order/{id} singular URI -> 301 Moved Permanently with Location: /orders/{id}
+# Command: curl.exe -i -X GET http://127.0.0.1:5066/order/94f1161f-aa8e-4b0f-95bb-5d302770c9e0
+================================================================================
+HTTP/1.1 301 MOVED PERMANENTLY
+Server: Werkzeug/3.1.8 Python/3.13.5
+Date: Sun, 11 Oct 2026 08:52:13 GMT
+Content-Type: text/html; charset=utf-8
+Content-Length: 0
+Location: /orders/94f1161f-aa8e-4b0f-95bb-5d302770c9e0
+X-Content-Type-Options: nosniff
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+Server: CampusEats-OrdersService/2.0
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS, HEAD
+Access-Control-Allow-Headers: Authorization, Content-Type, Accept, If-None-Match, If-Match, Idempotency-Key, X-HTTP-Method-Override, X-Simulate-Outage
+Access-Control-Expose-Headers: Location, ETag, X-RateLimit-Limit, X-RateLimit-Remaining, Retry-After
+X-RateLimit-Limit: 60
+X-RateLimit-Remaining: 50
+Connection: close
+

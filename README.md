@@ -13,7 +13,7 @@
 
 ---
 
-Welcome to the **CampusEats Engineering & Analysis Suite**. This repository contains the complete deliverables for **Assignments 1, 2, 3, and 4 of CS 543 Web Services**. It covers HTTP diagnostics (Assignment 1), microservice architecture and schemas (Assignment 2), SOAP partner integration (Assignment 3), and rebuilding the Orders service in REST with OpenAPI contracts, resilient outbound calls, and safe retries (Assignment 4).
+Welcome to the **CampusEats Engineering & Analysis Suite**. This repository contains the complete deliverables for **Assignments 1, 2, 3, 4, 5, and 6 of CS 543 Web Services**. It covers HTTP diagnostics (Assignment 1), microservice architecture and schemas (Assignment 2), SOAP partner integration (Assignment 3), rebuilding the Orders service in REST (Assignment 4), HTTP methods and headers (Assignment 5), and honest responses, status codes, RFC 7807 problem details, and multi-field validation (Assignment 6).
 
 ---
 
@@ -105,6 +105,62 @@ This section contains the RESTful Rebuilding of the CampusEats Orders Service:
 #### 4. 📝 [Assignment Report & Notes](Assignment-4/NOTES.md)
 * **File:** [Assignment-4/NOTES.md](file:///C:/AI%20Coding%20Challenge%20Platform/Assignment-4/NOTES.md)
 * **Overview:** Comprehensive technical report covering Resource Table, A5 justification, D3 fallback reasoning, answers to Questions 1–5, and complete live `curl -i` transcript.
+
+---
+
+### 📡 Assignment 5
+
+This section contains HTTP Methods & Headers implementation for the CampusEats Orders Service:
+
+#### 1. 📑 [OpenAPI 3.0 Contract](Assignment-5/openapi.yaml)
+* **File:** [Assignment-5/openapi.yaml](file:///C:/AI%20Coding%20Challenge%20Platform/Assignment-5/openapi.yaml)
+* **Overview:** Complete OpenAPI specification with conditional requests (ETag / If-None-Match, If-Match), CORS, and rate limiting headers.
+
+#### 2. 💻 Microservice Implementation
+* **Files:**
+  - [app.py](file:///C:/AI%20Coding%20Challenge%20Platform/Assignment-5/app.py) &mdash; Orders service with conditional caching (`304 Not Modified`), optimistic concurrency (`412 Precondition Failed`), `OPTIONS` verb discovery, and `X-HTTP-Method-Override`.
+  - [models.py](file:///C:/AI%20Coding%20Challenge%20Platform/Assignment-5/models.py) &mdash; ETag computation (`compute_etag()`), versioning, and state replacement.
+  - [store.py](file:///C:/AI%20Coding%20Challenge%20Platform/Assignment-5/store.py) &mdash; In-memory store and sliding window rate limiter.
+  - [client.py](file:///C:/AI%20Coding%20Challenge%20Platform/Assignment-5/client.py) &mdash; Resilient payment client with simulation modes.
+
+#### 3. 🧪 [Automated Tests](Assignment-5/tests/test_orders.py)
+* **File:** [Assignment-5/tests/test_orders.py](file:///C:/AI%20Coding%20Challenge%20Platform/Assignment-5/tests/test_orders.py)
+* **Overview:** 14 automated pytest cases verifying conditional GET/PUT, idempotency, rate limiting, and verb discovery.
+
+#### 4. 📝 [Assignment Report & Notes](Assignment-5/NOTES.md)
+* **File:** [Assignment-5/NOTES.md](file:///C:/AI%20Coding%20Challenge%20Platform/Assignment-5/NOTES.md)
+* **Overview:** Detailed technical documentation answering all Assignment 5 questions and including full verified curl transcripts.
+
+---
+
+### 🛡️ Assignment 6
+
+This section contains the deliverables for **Assignment 6: Honest responses: status codes, errors & validation**:
+
+#### 1. 📑 [OpenAPI 3.0 Contract](Assignment-6/openapi.yaml)
+* **File:** [Assignment-6/openapi.yaml](file:///C:/AI%20Coding%20Challenge%20Platform/Assignment-6/openapi.yaml)
+* **Overview:** OpenAPI 3.0.3 specification covering all status codes, RFC 7807/9457 Problem Details schemas, field-level 422 error structures, and Content Negotiation.
+
+#### 2. 💻 Microservice Implementation
+* **Files:**
+  - [app.py](file:///C:/AI%20Coding%20Challenge%20Platform/Assignment-6/app.py) &mdash; Orders service with comprehensive status code mapping, multi-field validation, content negotiation (`application/json` & `application/xml`, `406 Not Acceptable`), `Retry-After` headers, and internal error concealment.
+  - [models.py](file:///C:/AI%20Coding%20Challenge%20Platform/Assignment-6/models.py) &mdash; Order domain model with XML (`to_xml()`) and JSON serialization, state machine checks.
+  - [schema.py](file:///C:/AI%20Coding%20Challenge%20Platform/Assignment-6/schema.py) &mdash; JSON Schema and multi-error validator collecting all bad fields simultaneously.
+  - [errors.py](file:///C:/AI%20Coding%20Challenge%20Platform/Assignment-6/errors.py) &mdash; RFC 7807 Problem Details builder supporting JSON and XML with explicit `charset=utf-8`.
+  - [store.py](file:///C:/AI%20Coding%20Challenge%20Platform/Assignment-6/store.py) &mdash; In-memory store, sliding window rate limiter, outage simulator.
+  - [client.py](file:///C:/AI%20Coding%20Challenge%20Platform/Assignment-6/client.py) &mdash; Payment and inventory stock client with failure mode simulations.
+
+#### 3. 🧪 [Automated Tests](Assignment-6/tests/test_orders.py)
+* **File:** [Assignment-6/tests/test_orders.py](file:///C:/AI%20Coding%20Challenge%20Platform/Assignment-6/tests/test_orders.py)
+* **Overview:** 16 automated pytest cases verifying status codes, multi-error 422, XML negotiation, rate limiting, and A5 regressions.
+
+#### 4. 📜 [Live curl Transcript](Assignment-6/transcript.txt)
+* **File:** [Assignment-6/transcript.txt](file:///C:/AI%20Coding%20Challenge%20Platform/Assignment-6/transcript.txt) / [Assignment-6/curl-transcript.txt](file:///C:/AI%20Coding%20Challenge%20Platform/Assignment-6/curl-transcript.txt)
+* **Overview:** Live captured curl -i sessions proving happy path (D1), failure paths (D2), content negotiation (D3), and regression checks (D4).
+
+#### 5. 📝 [Assignment Report & Notes](Assignment-6/NOTES.md)
+* **File:** [Assignment-6/NOTES.md](file:///C:/AI%20Coding%20Challenge%20Platform/Assignment-6/NOTES.md)
+* **Overview:** Complete technical report answering Questions 1–7 with Team 11 member details.
 
 ---
 
