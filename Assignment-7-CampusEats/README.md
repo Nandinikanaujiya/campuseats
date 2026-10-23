@@ -53,7 +53,7 @@ create a new dish in the database.
 ## 7. Demonstration
 
 GitHub Repository:
-[Add repository link]
+[https://github.com/Nandinikanaujiya/campuseats/tree/main/Assignment-7-CampusEats]
 
 Demonstration Video:
 [https://drive.google.com/file/d/1WQsEJicNojdKtAjWpXVCoCnz1vA5I6VT/view?usp=sharing]
