@@ -1,0 +1,179 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CampusEats | Menu</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>CampusEats</h1>
+    <p>Discover your campus favourites</p>
+  </header>
+
+  <main>
+    <section class="menu-section">
+      <h2>Available Menu</h2>
+      <p>Menu items loaded from our GraphQL API.</p>
+
+      <p id="status" role="status"></p>
+      <div id="dishList" class="dish-grid">Loading dishes...</div>
+    </section>
+
+    <section class="form-section">
+      <h2>Add a Dish</h2>
+
+      <form id="dishForm">
+        <label for="dishName">Dish name</label>
+        <input id="dishName" type="text"
+               placeholder="e.g. Paneer Roll" required>
+
+        <label for="dishPrice">Price (₹)</label>
+        <input id="dishPrice" type="number"
+               min="0.01" step="0.01"
+               placeholder="e.g. 90" required>
+
+        <button type="submit">Add Dish</button>
+      </form>
+
+      <p id="formMessage" role="status"></p>
+    </section>
+  </main>
+
+  <footer>
+    CS543 Web Services · GraphQL Assignment 7
+  </footer>
+
+  <script>
+    const API = 'http://localhost:4000/';
+
+    async function gql(query, variables = {}) {
+      const response = await fetch(API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query, variables })
+      });
+
+      const result = await response.json();
+
+      if (!response.ok || result.errors) {
+        throw new Error(
+          result.errors?.map(e => e.message).join(', ')
+          || 'GraphQL request failed'
+        );
+      }
+
+      return result.data;
+    }
+
+    async function loadDishes() {
+      const list = document.getElementById('dishList');
+      const status = document.getElementById('status');
+
+      list.textContent = 'Loading dishes...';
+      status.textContent = '';
+
+      try {
+        const data = await gql(`
+          query {
+            dishes {
+              id
+              name
+              price
+              available
+            }
+          }
+        `);
+
+        list.replaceChildren();
+
+        if (data.dishes.length === 0) {
+          list.textContent = 'No dishes found. Add your first dish!';
+          return;
+        }
+
+        data.dishes.forEach(dish => {
+          const card = document.createElement('article');
+          card.className = 'dish-card';
+
+          const name = document.createElement('h3');
+          name.textContent = dish.name;
+
+          const price = document.createElement('p');
+          price.className = 'price';
+          price.textContent = `₹${Number(dish.price).toFixed(2)}`;
+
+          const availability = document.createElement('span');
+          availability.className = dish.available
+            ? 'available'
+            : 'unavailable';
+          availability.textContent = dish.available
+            ? 'Available'
+            : 'Currently unavailable';
+
+          card.append(name, price, availability);
+          list.appendChild(card);
+        });
+      } catch (error) {
+        list.textContent = 'Could not load dishes.';
+        status.textContent = error.message;
+      }
+    }
+
+    document.getElementById('dishForm')
+      .addEventListener('submit', async event => {
+        event.preventDefault();
+
+        const name = document.getElementById('dishName')
+          .value.trim();
+        const price = Number(
+          document.getElementById('dishPrice').value
+        );
+        const message = document.getElementById('formMessage');
+        const button = event.submitter;
+
+        if (!name || !Number.isFinite(price) || price <= 0) {
+          message.textContent =
+            'Enter a dish name and a price greater than zero.';
+          return;
+        }
+
+        button.disabled = true;
+        message.textContent = 'Adding dish...';
+
+        try {
+          const data = await gql(`
+            mutation AddDish($input: AddDishInput!) {
+              addDish(input: $input) {
+                id
+                name
+                price
+                available
+              }
+            }
+          `, {
+            input: {
+              name,
+              price
+            }
+          });
+
+          message.textContent =
+            `${data.addDish.name} was added successfully!`;
+
+          event.target.reset();
+          await loadDishes();
+        } catch (error) {
+          message.textContent =
+            'Could not add dish: ' + error.message;
+        } finally {
+          button.disabled = false;
+        }
+      });
+
+    loadDishes();
+  </script>
+</body>
+</html>
