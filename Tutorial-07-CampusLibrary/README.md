@@ -1,5 +1,12 @@
 # Campus Library — GraphQL Tutorial
 
+## Team details - Team Number 11 
+
+- Alka Jha - 20251651013
+- Alok Mishra - 20251651014
+- Nandini Kanaujiya - 20251651061
+- Radhika Verma - 20251651075
+
 ## 1. Overview
 
 This project demonstrates a basic GraphQL API for a Campus Library system. It uses Node.js, Apollo Server, GraphQL, and MySQL to retrieve and manage library data.
