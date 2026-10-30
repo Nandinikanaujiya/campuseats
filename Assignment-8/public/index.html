@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CampusEats &middot; Menu Catalogue</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="app-layout">
+  <!-- Top Navigation Bar -->
+  <nav class="navbar">
+    <div class="nav-brand">
+      <span class="brand-icon">🍔</span>
+      <div class="brand-text">
+        <span class="brand-name">CampusEats</span>
+        <span class="brand-tagline">Fresh Bites &bull; Daily Specials</span>
+      </div>
+    </div>
+    <div class="nav-status">
+      <span class="status-indicator"></span>
+      <span class="status-text">Open Now &bull; Delivering to Campus</span>
+    </div>
+  </nav>
+
+  <!-- Hero Banner -->
+  <header class="hero-banner">
+    <div class="hero-content">
+      <div class="hero-tag">🔥 Today's Kitchen Specials</div>
+      <h1>CampusEats Menu Catalogue</h1>
+      <p class="hero-sub">Fresh ingredients, student-friendly pricing, and instant real-time kitchen updates.</p>
+    </div>
+    <div class="hero-stats">
+      <div class="stat-card">
+        <span class="stat-num" id="dishCounter">0</span>
+        <span class="stat-lbl">Dishes on Menu</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-num">⚡ 15m</span>
+        <span class="stat-lbl">Avg. Prep Time</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-num">★ 4.9</span>
+        <span class="stat-lbl">Campus Rating</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Grid -->
+  <main class="main-content">
+    
+    <!-- Left Column: Menu Items List -->
+    <section class="menu-section">
+      <div class="section-header">
+        <div>
+          <h2>Available Menu Dishes</h2>
+          <p class="section-sub">Browse items currently being served in our kitchen</p>
+        </div>
+        
+        <!-- Live Search -->
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="searchInput" placeholder="Search dish name..." oninput="filterDishes()">
+        </div>
+      </div>
+
+      <!-- Categories Filter Pills -->
+      <div class="category-pills">
+        <button class="pill active" onclick="setCategory('all', this)">All Items</button>
+        <button class="pill" onclick="setCategory('meals', this)">Meals &amp; Thalis</button>
+        <button class="pill" onclick="setCategory('snacks', this)">Snacks &amp; Rolls</button>
+        <button class="pill" onclick="setCategory('drinks', this)">Drinks &amp; Desserts</button>
+      </div>
+
+      <!-- Dishes Container (populated via GET /items) -->
+      <div id="list" class="dishes-grid">
+        <div class="loading-state">
+          <div class="spinner"></div>
+          <p>Loading kitchen menu...</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Right Column: Add Dish Card -->
+    <aside class="sidebar-section">
+      <div class="form-card">
+        <div class="form-header">
+          <span class="form-icon">✨</span>
+          <div>
+            <h3>Add a New Dish</h3>
+            <p>Publish a new item directly to the live kitchen catalogue</p>
+          </div>
+        </div>
+
+        <form id="addForm">
+          <div class="input-field">
+            <label for="name">Dish Name *</label>
+            <div class="input-wrapper">
+              <span class="input-icon">🍽️</span>
+              <input id="name" placeholder="e.g. Gulab Jamun, Samosa" required autocomplete="off">
+            </div>
+          </div>
+
+          <div class="input-field">
+            <label for="price">Price (in Rupees) *</label>
+            <div class="input-wrapper">
+              <span class="input-icon">₹</span>
+              <input id="price" type="number" placeholder="e.g. 30" min="0" required autocomplete="off">
+            </div>
+          </div>
+
+          <button type="submit" class="submit-btn" id="submitBtn">
+            <span>+ Add to Kitchen Menu</span>
+          </button>
+        </form>
+
+        <div id="toast" class="toast-notification">
+          <span class="toast-emoji">🎉</span>
+          <div class="toast-body">
+            <strong id="toastTitle">Added to Menu!</strong>
+            <span id="toastMsg">Dish successfully updated.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Highlights Card -->
+      <div class="highlights-card">
+        <h4>CampusEats Highlights</h4>
+        <ul class="highlights-list">
+          <li>🌿 100% Fresh daily ingredients</li>
+          <li>💰 Budget-friendly pricing for campus</li>
+          <li>⚡ Real-time updates via Express REST API</li>
+        </ul>
+      </div>
+    </aside>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="app-footer">
+    <p>&copy; 2026 CampusEats &bull; CS543 Web Services &bull; Team 11</p>
+  </footer>
+</div>
+
+<script>
+let allDishes = [];
+let currentCategory = 'all';
+
+// Food icon & category resolver
+function getDishMeta(name) {
+  const lower = name.toLowerCase();
+  if (lower.includes('thali') || lower.includes('rice') || lower.includes('curry') || lower.includes('biryani') || lower.includes('paneer') || lower.includes('dal')) {
+    return { icon: '🍛', category: 'meals', tag: 'Chef Special', veg: true };
+  }
+  if (lower.includes('roll') || lower.includes('wrap') || lower.includes('shawarma') || lower.includes('burger') || lower.includes('sandwich')) {
+    return { icon: '🌯', category: 'snacks', tag: 'Popular Snack', veg: true };
+  }
+  if (lower.includes('dosa') || lower.includes('idli') || lower.includes('vada') || lower.includes('samosa') || lower.includes('kachori') || lower.includes('chaat')) {
+    return { icon: '🥞', category: 'snacks', tag: 'Crispy & Hot', veg: true };
+  }
+  if (lower.includes('coffee') || lower.includes('tea') || lower.includes('chai') || lower.includes('shake') || lower.includes('juice') || lower.includes('beverage')) {
+    return { icon: '☕', category: 'drinks', tag: 'Refreshing', veg: true };
+  }
+  if (lower.includes('jamun') || lower.includes('sweet') || lower.includes('dessert') || lower.includes('cake') || lower.includes('halwa')) {
+    return { icon: '🍨', category: 'drinks', tag: 'Sweet Treat', veg: true };
+  }
+  if (lower.includes('chicken') || lower.includes('meat') || lower.includes('egg') || lower.includes('fish')) {
+    return { icon: '🍗', category: 'meals', tag: 'Bestseller', veg: false };
+  }
+  return { icon: '🍽️', category: 'meals', tag: 'Special', veg: true };
+}
+
+// 1. READ: Fetch all items via GET /items
+async function load() {
+  try {
+    const res = await fetch('/items');
+    allDishes = await res.json();
+    
+    // Update counter
+    const counter = document.getElementById('dishCounter');
+    if (counter) counter.innerText = allDishes.length;
+
+    renderList();
+  } catch (err) {
+    document.getElementById('list').innerHTML = `
+      <div class="error-state">
+        <p>⚠️ Failed to load menu from REST API (http://localhost:3000/items).</p>
+      </div>`;
+  }
+}
+
+// Render dishes with search & category filters
+function renderList() {
+  const search = (document.getElementById('searchInput')?.value || '').toLowerCase().trim();
+  const listEl = document.getElementById('list');
+
+  const filtered = allDishes.filter(item => {
+    const meta = getDishMeta(item.name);
+    const matchesSearch = item.name.toLowerCase().includes(search);
+    const matchesCat = currentCategory === 'all' || meta.category === currentCategory;
+    return matchesSearch && matchesCat;
+  });
+
+  if (filtered.length === 0) {
+    listEl.innerHTML = `
+      <div class="empty-state">
+        <span style="font-size: 2.2rem;">🍽️</span>
+        <p style="font-weight: 600; margin-top: 0.5rem; color: #475569;">No dishes found</p>
+        <span style="font-size: 0.88rem; color: #94a3b8;">Try a different keyword or add a dish with the form!</span>
+      </div>`;
+    return;
+  }
+
+  listEl.innerHTML = filtered.map(dish => {
+    const meta = getDishMeta(dish.name);
+    return `
+      <div class="dish-card">
+        <div class="dish-badge-row">
+          <span class="diet-dot ${meta.veg ? 'veg' : 'non-veg'}" title="${meta.veg ? 'Vegetarian' : 'Non-Vegetarian'}"></span>
+          <span class="dish-tag">${meta.tag}</span>
+        </div>
+        <div class="dish-main">
+          <div class="dish-avatar">${meta.icon}</div>
+          <div class="dish-info">
+            <h4 class="name">${dish.name}</h4>
+            <span class="dish-desc">Freshly prepared with authentic ingredients</span>
+          </div>
+        </div>
+        <div class="dish-footer">
+          <div class="price-wrap">
+            <span class="currency">₹</span>
+            <span class="price">${dish.price}</span>
+          </div>
+          <span class="avail-badge">${dish.available ? 'In Stock' : 'Sold Out'}</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// Category filter
+function setCategory(cat, btn) {
+  currentCategory = cat;
+  document.querySelectorAll('.category-pills .pill').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  renderList();
+}
+
+// Search filter
+function filterDishes() {
+  renderList();
+}
+
+// 2. WRITE: Form POST /items to add a dish
+document.getElementById('addForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const nameInput = document.getElementById('name');
+  const priceInput = document.getElementById('price');
+  const submitBtn = document.getElementById('submitBtn');
+
+  const name = nameInput.value.trim();
+  const price = priceInput.value;
+
+  if (!name) return;
+
+  submitBtn.disabled = true;
+  submitBtn.innerText = 'Adding dish...';
+
+  try {
+    const res = await fetch('/items', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, price, available: true })
+    });
+
+    if (res.ok) {
+      const added = await res.json();
+      showToast(added.name, added.price);
+      nameInput.value = '';
+      priceInput.value = '';
+      await load();
+    }
+  } catch (err) {
+    console.error('Error adding dish:', err);
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.innerHTML = '<span>+ Add to Kitchen Menu</span>';
+  }
+});
+
+// Toast popup
+function showToast(name, price) {
+  const toast = document.getElementById('toast');
+  const title = document.getElementById('toastTitle');
+  const msg = document.getElementById('toastMsg');
+  
+  if (toast && title && msg) {
+    title.innerText = `"${name}" Added!`;
+    msg.innerText = `Listed at ₹${price} in live menu`;
+    toast.classList.add('show');
+    setTimeout(() => {
+      toast.classList.remove('show');
+    }, 3200);
+  }
+}
+
+// Initial load
+load();
+</script>
+
+</body>
+</html>

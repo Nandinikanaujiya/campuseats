@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CampusEats — Assignment 8 Demonstration</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  body {
+    margin: 0;
+    padding: 24px;
+    background: #0f172a;
+    color: #f8fafc;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+  .container {
+    max-width: 980px;
+    margin: 0 auto;
+  }
+  header {
+    text-align: center;
+    margin-bottom: 24px;
+    border-bottom: 1px solid #1e293b;
+    padding-bottom: 20px;
+  }
+  .brand-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(234, 88, 12, 0.18);
+    border: 1px solid rgba(234, 88, 12, 0.35);
+    color: #fb923c;
+    padding: 5px 14px;
+    border-radius: 9999px;
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 12px;
+  }
+  h1 {
+    color: #ffffff;
+    margin: 0 0 8px;
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+  }
+  .sub {
+    color: #94a3b8;
+    font-size: 15px;
+    margin: 0;
+  }
+  .card {
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 16px;
+    padding: 22px;
+    margin-bottom: 24px;
+    box-shadow: 0 12px 30px -6px rgba(0,0,0,0.4);
+  }
+  .card-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: #f1f5f9;
+    margin-bottom: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  video {
+    width: 100%;
+    border-radius: 12px;
+    border: 1px solid #475569;
+    background: #000;
+    display: block;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+  }
+  .action-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 14px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .badges {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .badge {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #e2e8f0;
+    font-size: 12px;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-weight: 600;
+  }
+  .btn-download {
+    background: #ea580c;
+    color: white;
+    text-decoration: none;
+    padding: 7px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+  }
+  .btn-download:hover {
+    background: #c2410c;
+  }
+  .screenshots-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 16px;
+  }
+  .screenshot-box {
+    background: #0f172a;
+    border: 1px solid #334155;
+    border-radius: 12px;
+    padding: 12px;
+    text-align: center;
+  }
+  .screenshot-box img {
+    width: 100%;
+    border-radius: 8px;
+    display: block;
+    margin-top: 8px;
+  }
+  .screenshot-box span {
+    font-size: 13px;
+    font-weight: 700;
+    color: #38bdf8;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <div class="brand-pill">🍔 CampusEats &bull; Assignment 8</div>
+    <h1>REST API &amp; Catalogue Demonstration</h1>
+    <p class="sub">Complete walkthrough: Node &amp; Express REST API, live browsing, and interactive dish creation</p>
+  </header>
+
+  <!-- Video Player Card -->
+  <div class="card">
+    <div class="card-title">
+      <span>🎬 Live Demonstration Video</span>
+      <span style="font-size: 13px; color: #4ade80; font-weight: 600;">● Universal MP4 Video</span>
+    </div>
+    <video controls autoplay loop muted playsinline>
+      <source src="demonstration.mp4" type="video/mp4">
+      Your browser does not support the video tag.
+    </video>
+    <div class="action-row">
+      <div class="badges">
+        <span class="badge">GET /items (200 OK)</span>
+        <span class="badge">GET /items/:id (200 / 404)</span>
+        <span class="badge">POST /items (201 / 422)</span>
+      </div>
+      <div>
+        <a href="demonstration.mp4" download class="btn-download">⬇ Download MP4 Video</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Screenshots Card -->
+  <div class="card">
+    <div class="card-title">
+      <span>📸 Before &amp; After POST Screenshots</span>
+    </div>
+    <div class="screenshots-grid">
+      <div class="screenshot-box">
+        <span>1. Before POST (4 Seed Items)</span>
+        <img src="screenshots/before-post.png" alt="Before POST">
+      </div>
+      <div class="screenshot-box">
+        <span>2. After POST (Live Addition Verified)</span>
+        <img src="screenshots/after-post.png" alt="After POST">
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

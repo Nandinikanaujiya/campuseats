@@ -164,6 +164,26 @@ This section contains the deliverables for **Assignment 6: Honest responses: sta
 
 ---
 
+### 🍔 Assignment 8
+
+This section contains the complete deliverables for **Assignment 8 of 12: Build one CampusEats service as a REST API**:
+
+#### 1. 🔌 REST API Server
+* **File:** [`Assignment-8/server.js`](Assignment-8/server.js)
+* **Overview:** Node & Express REST API managing the CampusEats Menu/Catalogue (`id`, `name`, `price`, `available`) with in-memory persistence and strict status code handling (`200 OK`, `201 Created`, `404 Not Found`, `422 Unprocessable Entity`).
+
+#### 2. 💻 Modern Front-End Client
+* **Files:** [`Assignment-8/public/index.html`](Assignment-8/public/index.html), [`Assignment-8/public/style.css`](Assignment-8/public/style.css)
+* **Overview:** Clean, responsive food menu catalogue displaying items via `fetch('/items')`, dynamic type-ahead search filter, and interactive dish addition form sending `POST /items`.
+
+#### 3. 📸 Screenshots & Working Demonstrations
+* **Before / After Screenshots:** [`Assignment-8/screenshots/before-post.png`](Assignment-8/screenshots/before-post.png) and [`Assignment-8/screenshots/after-post.png`](Assignment-8/screenshots/after-post.png)
+* **Demonstration Video:** [`Assignment-8/demonstration.mp4`](Assignment-8/demonstration.mp4) (H.264 MP4)
+* **Interactive Player:** [`Assignment-8/demonstration.html`](Assignment-8/demonstration.html)
+* **Submission Brief:** [`Assignment-8/ReadMe.pdf`](Assignment-8/ReadMe.pdf) & [`Assignment-8/README.md`](Assignment-8/README.md)
+
+---
+
 ## 🛠️ Verification & Tools Used
 
 To replicate or verify the logs in this repository:
