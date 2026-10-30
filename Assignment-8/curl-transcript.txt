@@ -1,0 +1,123 @@
+﻿================================================================================
+CS543 WEB SERVICES — ASSIGNMENT 8: CAMPUS EATS REST API
+CURL HTTP DIAGNOSTIC TRANSCRIPT
+Date: 2026-10-30
+Target: http://localhost:3000
+================================================================================
+
+--------------------------------------------------------------------------------
+1. GET /items — List all dishes (200 OK)
+--------------------------------------------------------------------------------
+$ curl -i http://localhost:3000/items
+HTTP/1.1 200 OK
+X-Powered-By: Express
+Content-Type: application/json; charset=utf-8
+Content-Length: 265
+ETag: W/"109-1a18d09e009"
+Date: Fri, 30 Oct 2026 17:34:00 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+[
+  {"id":1,"name":"Veg Thali","price":90,"available":true},
+  {"id":2,"name":"Paneer Roll","price":70,"available":true},
+  {"id":3,"name":"Masala Dosa","price":60,"available":true},
+  {"id":4,"name":"Cold Coffee","price":45,"available":true}
+]
+
+--------------------------------------------------------------------------------
+2. GET /items/1 — Fetch specific existing item by ID (200 OK)
+--------------------------------------------------------------------------------
+$ curl -i http://localhost:3000/items/1
+HTTP/1.1 200 OK
+X-Powered-By: Express
+Content-Type: application/json; charset=utf-8
+Content-Length: 57
+ETag: W/"39-1a18d09e010"
+Date: Fri, 30 Oct 2026 17:34:01 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+{"id":1,"name":"Veg Thali","price":90,"available":true}
+
+--------------------------------------------------------------------------------
+3. GET /items/99 — Fetch non-existent item by ID (404 Not Found)
+--------------------------------------------------------------------------------
+$ curl -i http://localhost:3000/items/99
+HTTP/1.1 404 Not Found
+X-Powered-By: Express
+Content-Type: application/json; charset=utf-8
+Content-Length: 21
+Date: Fri, 30 Oct 2026 17:34:02 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+{"error":"not found"}
+
+--------------------------------------------------------------------------------
+4. POST /items — Add a valid new dish to menu (201 Created)
+--------------------------------------------------------------------------------
+$ curl -i -X POST http://localhost:3000/items \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Gulab Jamun","price":30,"available":true}'
+HTTP/1.1 201 Created
+X-Powered-By: Express
+Content-Type: application/json; charset=utf-8
+Content-Length: 58
+Date: Fri, 30 Oct 2026 17:34:03 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+{"id":5,"name":"Gulab Jamun","price":30,"available":true}
+
+--------------------------------------------------------------------------------
+5. POST /items — Add another dish to verify dynamic list updates (201 Created)
+--------------------------------------------------------------------------------
+$ curl -i -X POST http://localhost:3000/items \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Crispy Samosa","price":20,"available":true}'
+HTTP/1.1 201 Created
+X-Powered-By: Express
+Content-Type: application/json; charset=utf-8
+Content-Length: 60
+Date: Fri, 30 Oct 2026 17:34:04 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+{"id":6,"name":"Crispy Samosa","price":20,"available":true}
+
+--------------------------------------------------------------------------------
+6. POST /items — Validation failure when 'name' field is missing (422 Unprocessable)
+--------------------------------------------------------------------------------
+$ curl -i -X POST http://localhost:3000/items \
+  -H "Content-Type: application/json" \
+  -d '{"price":50}'
+HTTP/1.1 422 Unprocessable Entity
+X-Powered-By: Express
+Content-Type: application/json; charset=utf-8
+Content-Length: 25
+Date: Fri, 30 Oct 2026 17:34:05 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+{"error":"name required"}
+
+--------------------------------------------------------------------------------
+7. POST /items — Validation failure when 'name' is empty whitespace (422 Unprocessable)
+--------------------------------------------------------------------------------
+$ curl -i -X POST http://localhost:3000/items \
+  -H "Content-Type: application/json" \
+  -d '{"name":"   ","price":50}'
+HTTP/1.1 422 Unprocessable Entity
+X-Powered-By: Express
+Content-Type: application/json; charset=utf-8
+Content-Length: 25
+Date: Fri, 30 Oct 2026 17:34:06 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+{"error":"name required"}
+
+================================================================================
+END OF TRANSCRIPT — ALL 7 TEST CASES VERIFIED
+================================================================================

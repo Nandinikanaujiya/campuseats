@@ -21,6 +21,8 @@
 * **Demonstration Video:** [`demonstration.mp4`](demonstration.mp4) (H.264 MP4; plays natively in Windows Media Player & browsers)
 * **Interactive Player:** [`demonstration.html`](demonstration.html)
 * **Animated Demo GIF:** [`demonstration.gif`](demonstration.gif)
+* **Automated Test Suite:** [`test.js`](test.js) (6/6 passing tests covering all routes & error conditions)
+* **HTTP curl Transcript:** [`curl-transcript.txt`](curl-transcript.txt) (Raw HTTP request/response diagnostics)
 * **Submission Brief PDF:** [`ReadMe.pdf`](ReadMe.pdf)
 
 ---
